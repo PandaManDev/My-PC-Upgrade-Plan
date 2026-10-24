@@ -60,10 +60,8 @@ function render(){const shown=parts;$('partsGrid').innerHTML=shown.map(p=>'<arti
 function updateTotals(){}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-toggle]');if(!b)return;const id=b.dataset.toggle;state[id]=state[id]||{};state[id].purchased=!state[id].purchased;save();render()});
 document.addEventListener('change',e=>{const el=e.target;if(!el.matches('[data-price]'))return;const id=el.dataset.price;state[id]=state[id]||{};if(el.value==='')delete state[id].price;else state[id].price=Math.max(0,Math.round((Number(el.value)||0)*100)/100);save();updateTotals()});
-$('budgetInput').addEventListener('input',()=>{try{localStorage.setItem('pcUpgradePlanBudgetV2',$('budgetInput').value)}catch(e){}updateTotals()});
-try{$('budgetInput').value=localStorage.getItem('pcUpgradePlanBudgetV2')||'300'}catch(e){}
 $('reset').addEventListener('click',()=>{if(confirm('Reset all prices and purchase checkmarks?')){state={};save();render()}});
-$('year').textContent=new Date().getFullYear();render();
+render();
 </script>
 </body>
 </html>
