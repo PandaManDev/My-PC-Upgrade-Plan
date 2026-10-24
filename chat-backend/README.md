@@ -1,24 +1,13 @@
-# Pandas PC Upgrade Plan — Custom Chat Backend
+# Pandas PC Upgrade Plan — Supabase Chat Backend
 
-This is a custom-coded two-way chat API and private owner inbox. It does not embed a third-party chat widget.
+1. Run `supabase/schema.sql` in Supabase SQL Editor: https://supabase.com/dashboard/project/jitmbvmeeyqjekyxaluk/sql/new
+2. In Vercel project `pandas-pc-upgrade-chat`, set:
+   - `SUPABASE_URL=https://jitmbvmeeyqjekyxaluk.supabase.co`
+   - `SUPABASE_SERVICE_ROLE_KEY` = your server-only `sb_secret_...` or legacy service_role key
+   - Keep existing `CHAT_AUTH_SECRET` and `CHAT_ADMIN_SECRET` values unchanged
+   - `CHAT_ALLOWED_ORIGIN=https://pandamandev.github.io`
+3. Apply to Production and Preview as needed, then redeploy. Project root directory: `chat-backend`.
 
-## Required environment variables
+Never commit the Supabase server key or put it in browser JavaScript. RLS is enabled and no public policies are created; backend access uses the server key.
 
-Configure these in the Vercel project (never put them in public GitHub files):
-
-- `UPSTASH_REDIS_REST_URL`: private Upstash Redis REST URL.
-- `UPSTASH_REDIS_REST_TOKEN`: private Upstash Redis REST token.
-- `CHAT_ADMIN_SECRET`: long random secret used to unlock `/admin.html`.
-- `CHAT_ALLOWED_ORIGIN`: `https://pandamandev.github.io`.
-
-The backend stores messages in Redis lists and conversation IDs in a Redis set. It limits each conversation to the latest 200 messages. Use a strong unique admin secret and do not share it.
-
-## Deploy
-
-Create a Vercel project from this repository with root directory `chat-backend`. Add the environment variables above, then deploy. The frontend at GitHub Pages must use the resulting deployment URL in `CHAT_API_BASE` in the main `index.html`, including the `/api` suffix.
-
-Owner inbox: `https://YOUR-CHAT-BACKEND.vercel.app/admin.html`.
-
-## Security notes
-
-The admin API checks a bearer secret server-side using a constant-time comparison. The secret is entered into the owner dashboard and is not stored in localStorage. The public API only exposes messages when a visitor has the unguessable conversation ID stored in their browser. CORS is restricted to the configured website origin. Use HTTPS, rotate secrets if exposed, and consider adding abuse throttling before opening the chat widely.
+Data note: this migration does not automatically import records from the suspended Vercel Blob store. If Blob can be re-enabled/exported, import records before switching production. If inaccessible, accounts may need to be recreated.
