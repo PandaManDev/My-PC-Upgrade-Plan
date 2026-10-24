@@ -31,15 +31,26 @@ header{display:flex;justify-content:space-between;align-items:center;gap:14px;pa
 @media(max-width:850px){.site-header{grid-template-columns:auto 1fr;gap:8px 12px}.site-header .brand{grid-column:1;grid-row:1}.site-header .header-actions,.site-header .actions{grid-column:2;grid-row:1;justify-self:end}.site-nav{grid-column:1/-1;grid-row:2;justify-content:flex-start;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:2px 0 3px}.site-nav::-webkit-scrollbar{display:none}.site-nav a{flex:0 0 auto;min-height:36px;padding:7px 12px}}
 @media(max-width:420px){.site-header{padding:9px 11px;gap:7px}.site-header .logo{width:32px;height:32px;font-size:17px}.site-header .brand{font-size:10px;letter-spacing:0}.site-header .header-actions .button,.site-header .actions .button{min-height:36px;padding:7px 9px;font-size:11px}.site-nav a{font-size:11px;padding:7px 10px}}
 
+
+/* Match the main page navigation and improve mobile usability */
+.menu-button{display:none;align-items:center;gap:7px;border-color:#b69aff55;background:#b69aff10}
+.menu-icon{font-size:16px;line-height:1}
+.site-nav a:focus-visible,.button:focus-visible{outline:2px solid #f0abfc;outline-offset:3px}
+@media(min-width:851px){.site-header{grid-template-columns:minmax(210px,auto) 1fr auto}.site-nav{gap:7px}.site-nav a{padding-inline:13px}}
+@media(max-width:850px){.site-header{grid-template-columns:minmax(0,1fr) auto;gap:9px 12px;padding:10px max(14px,calc((100% - 1000px)/2))}.site-header .brand{grid-column:1;grid-row:1}.site-header .actions{grid-column:2;grid-row:1;justify-self:end}.menu-button{display:inline-flex}.site-nav{grid-column:1/-1;grid-row:2;display:flex;justify-content:flex-start;gap:6px;overflow-x:auto;scrollbar-width:none;max-width:100%;padding:2px 0 4px}.site-nav::-webkit-scrollbar{display:none}.site-nav a{flex:0 0 auto}}
+@media(max-width:700px){.site-header{padding:9px 12px;gap:8px;background:rgba(13,8,22,.94)}.site-header .brand{font-size:clamp(10px,2.8vw,13px);gap:8px}.site-header .brand-label{max-width:145px;white-space:normal}.site-header .logo{width:34px;height:34px;font-size:17px;border-radius:11px}.site-header .actions{gap:6px}.site-header .actions .button{min-height:40px;padding:8px 10px;font-size:12px}.site-nav{border-top:1px solid transparent}.site-header:not(.menu-open) .site-nav{display:none}.site-header.menu-open .site-nav{display:flex;border-top-color:#b69aff28;padding-top:8px;padding-bottom:5px}.site-header.menu-open{box-shadow:0 12px 32px #0006}.site-nav a{min-height:40px;padding:9px 13px;border-radius:10px;font-size:12px}.hero{padding-top:30px}.grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}.spec{padding:12px}.value{font-size:14px}.detail{overflow-wrap:anywhere}}
+@media(max-width:480px){.grid{grid-template-columns:1fr}.spec{padding:14px}.value{font-size:15px}.notice{padding:12px;font-size:11px}}
+@media(max-width:360px){.site-header .brand-label{max-width:112px}.site-header .actions .button{padding:7px 8px;font-size:11px}.site-header .menu-label{display:none}.site-header .menu-icon{font-size:18px}.site-nav a{padding:8px 10px;font-size:11px}}
+
 </style>
 </head>
 <body>
 <header class="site-header">
 <a class="brand" href="./index.html"><span class="logo" aria-hidden="true">🛒</span><span class="brand-label">PANDAS PC UPGRADE PLAN</span></a>
-<nav class="site-nav" aria-label="Main navigation">
-<a href="./index.html">Home</a><a href="./index.html#my-pc">My PC</a><a href="./index.html#parts">Wishlist</a><a href="./specs.html" aria-current="page">Full Specs</a>
+<nav class="site-nav" id="mainNavigation" aria-label="Main navigation">
+<a href="./index.html">Home</a><a href="./specs.html" aria-current="page">Full Specs</a>
 </nav>
-<div class="actions"><button class="button" id="shareSite" type="button">↗ Share</button></div>
+<div class="actions"><button class="button menu-button" id="menuToggle" type="button" aria-expanded="false" aria-controls="mainNavigation" aria-label="Open navigation menu"><span class="menu-icon" aria-hidden="true">☰</span><span class="menu-label">Menu</span></button><button class="button" id="shareSite" type="button">↗ Share</button></div>
 </header>
 <main class="wrap">
 <section class="hero">
@@ -63,6 +74,14 @@ header{display:flex;justify-content:space-between;align-items:center;gap:14px;pa
 <footer class="footer">Pandas PC Upgrade Plan · <a href="./index.html">Back to my wishlist</a></footer>
 </main>
 <script>
+
+const menuToggle=document.getElementById('menuToggle');
+const siteHeader=document.querySelector('.site-header');
+function closeMobileMenu(){siteHeader.classList.remove('menu-open');menuToggle.setAttribute('aria-expanded','false');menuToggle.setAttribute('aria-label','Open navigation menu');menuToggle.querySelector('.menu-icon').textContent='☰';menuToggle.querySelector('.menu-label').textContent='Menu'}
+menuToggle.addEventListener('click',()=>{const open=siteHeader.classList.toggle('menu-open');menuToggle.setAttribute('aria-expanded',String(open));menuToggle.setAttribute('aria-label',open?'Close navigation menu':'Open navigation menu');menuToggle.querySelector('.menu-icon').textContent=open?'✕':'☰';menuToggle.querySelector('.menu-label').textContent=open?'Close':'Menu'});
+document.querySelectorAll('#mainNavigation a').forEach(link=>link.addEventListener('click',closeMobileMenu));
+window.addEventListener('resize',()=>{if(window.innerWidth>700)closeMobileMenu()});
+
 const shareButton=document.getElementById('shareSite');
 async function copyLink(){const url='https://pandamandev.github.io/My-PC-Upgrade-Plan/specs.html';try{await navigator.clipboard.writeText(url);shareButton.textContent='✓ Copied';setTimeout(()=>shareButton.textContent='↗ Share',1800)}catch(e){window.prompt('Copy your PC specs page link:',url)}}
 shareButton.addEventListener('click',async()=>{const data={title:'Pandas PC Specs',text:'Check out my PC specs!',url:'https://pandamandev.github.io/My-PC-Upgrade-Plan/specs.html'};if(navigator.share){try{await navigator.share(data)}catch(e){if(e.name!=='AbortError')copyLink()}}else copyLink()});
