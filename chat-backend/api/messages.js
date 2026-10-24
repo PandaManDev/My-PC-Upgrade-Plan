@@ -1,7 +1,7 @@
 const crypto = require('node:crypto');
 const { put, list, get } = require('@vercel/blob');
 const SITE_ORIGIN = process.env.CHAT_ALLOWED_ORIGIN || 'https://pandamandev.github.io';
-function cors(req,res){const origin=req.headers.origin;if(origin===SITE_ORIGIN||origin==='http://localhost:3000')res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Vary','Origin');res.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');res.setHeader('Access-Control-Allow-Headers','Content-Type');res.setHeader('Cache-Control','no-store');}
+function cors(req,res){const origin=req.headers.origin;const allowedOrigins=new Set([SITE_ORIGIN,'http://localhost:3000','https://pandas-pc-upgrade-chat.vercel.app','https://pandas-pc-upgrade-chat-jacobthegodcoders-projects.vercel.app']);if(allowedOrigins.has(origin))res.setHeader('Access-Control-Allow-Origin',origin);res.setHeader('Vary','Origin');res.setHeader('Access-Control-Allow-Methods','GET, POST, OPTIONS');res.setHeader('Access-Control-Allow-Headers','Content-Type');res.setHeader('Cache-Control','no-store');}
 function validId(v){return typeof v==='string'&&/^[a-f0-9-]{36}$/i.test(v)}
 function cleanText(v){return typeof v==='string'?v.trim().slice(0,1500):''}
 function cleanName(v){return typeof v==='string'?v.trim().slice(0,50):''}
