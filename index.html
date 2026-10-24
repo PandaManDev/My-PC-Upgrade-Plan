@@ -56,6 +56,13 @@ header{display:flex;justify-content:center;align-items:center;gap:20px;padding:2
 @media(max-width:360px){.site-header .brand-label{max-width:112px}.site-header .header-actions .button{padding:7px 8px;font-size:11px}.site-header .menu-label{display:none}.site-header .menu-icon{font-size:18px}.site-nav a{padding:8px 10px;font-size:11px}}
 @media(prefers-reduced-motion:reduce){.site-nav{transition:none}}
 
+
+.back-to-top{position:fixed;right:20px;bottom:20px;z-index:60;display:inline-flex;align-items:center;gap:8px;padding:12px 16px;border:1px solid #c084fc88;border-radius:999px;background:linear-gradient(135deg,#7c3aedf2,#a21cafed);color:#fff;font-weight:800;font-size:13px;box-shadow:0 8px 28px #0008,0 0 22px #c084fc33;cursor:pointer;opacity:0;visibility:hidden;transform:translateY(10px);transition:opacity .2s,transform .2s,visibility .2s}
+.back-to-top.visible{opacity:1;visibility:visible;transform:translateY(0)}
+.back-to-top:hover{filter:brightness(1.12);transform:translateY(-2px)}
+.back-to-top:focus-visible{outline:2px solid #f0abfc;outline-offset:3px}
+@media(max-width:420px){.back-to-top{right:12px;bottom:12px;padding:11px 14px;font-size:12px}}
+
 </style>
 </head>
 <body>
@@ -98,6 +105,7 @@ header{display:flex;justify-content:center;align-items:center;gap:20px;padding:2
 </section>
 
 </main>
+<button class="back-to-top" id="backToTop" type="button" aria-label="Go back to the top of the page" title="Back to top">↑ <span>Back to top</span></button>
 
 <script>
 const parts=[
@@ -124,6 +132,11 @@ function updateTotals(){
 $('reset').addEventListener('click',()=>{if(confirm('Reset all purchase checkmarks?')){state={};save();render()}});
 render();
 
+const backToTop=$('backToTop');
+function updateBackToTop(){backToTop.classList.toggle('visible',window.scrollY>320)}
+window.addEventListener('scroll',updateBackToTop,{passive:true});
+backToTop.addEventListener('click',()=>window.scrollTo({top:0,behavior:'smooth'}));
+updateBackToTop();
 
 const menuToggle=$('menuToggle');
 const siteHeader=document.querySelector('.site-header');
