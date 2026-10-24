@@ -73,9 +73,43 @@ header{display:flex;justify-content:center;align-items:center;gap:20px;padding:2
 .maintenance-announcement .maintenance-status{display:inline-flex;margin-top:9px;padding:3px 8px;border-radius:99px;border:1px solid #f59e0b66;background:#f59e0b12;color:#fcd34d;font-size:10px;font-weight:850;letter-spacing:.08em;text-transform:uppercase}
 @media(max-width:560px){.maintenance-announcement{width:calc(100% - 26px);margin-top:13px;padding:14px;gap:10px}.maintenance-announcement .maintenance-icon{flex-basis:32px;height:32px;font-size:17px}.maintenance-announcement h2{font-size:15px}.maintenance-announcement p{font-size:12px}}
 
+
+/* Panda loading screen */
+#pup-loading-screen{position:fixed;inset:0;z-index:99999;display:grid;place-items:center;overflow:hidden;background:radial-gradient(ellipse at 50% 38%,#4c1d9560 0,transparent 42%),radial-gradient(ellipse at 15% 90%,#701a7540 0,transparent 40%),#090611;color:#fbf7ff;opacity:1;visibility:visible;transition:opacity .55s ease,visibility .55s ease}
+#pup-loading-screen.pup-loaded{opacity:0;visibility:hidden;pointer-events:none}
+.pup-loader-glow{position:absolute;width:min(78vw,540px);aspect-ratio:1;border-radius:50%;background:#9333ea20;filter:blur(65px);animation:pupGlow 3s ease-in-out infinite alternate}
+.pup-loader-content{position:relative;z-index:1;width:min(88%,430px);display:flex;align-items:center;flex-direction:column;text-align:center;padding:28px 20px}
+.pup-loader-logo{width:94px;height:94px;display:grid;place-items:center;border:1px solid #e879f999;border-radius:29px;background:linear-gradient(145deg,#7c3aed,#c026d3);font-size:47px;box-shadow:0 0 30px #a855f766,0 0 85px #9333ea38;animation:pupFloat 2s ease-in-out infinite}
+.pup-loader-kicker{margin-top:29px;color:#d8b4fe;font-size:10px;font-weight:900;letter-spacing:.25em;text-transform:uppercase}
+.pup-loader-title{margin:8px 0 0;font-size:clamp(25px,6vw,35px);line-height:1.1;letter-spacing:-.055em;font-weight:900}
+.pup-loader-title span{background:linear-gradient(90deg,#c084fc,#f0abfc);background-clip:text;color:transparent}
+.pup-loader-caption{margin:11px 0 23px;color:#b9a8cb;font-size:13px}
+.pup-loader-track{width:min(100%,260px);height:5px;overflow:hidden;border-radius:99px;background:#2b1c3d;border:1px solid #a78bfa20}
+.pup-loader-track span{display:block;width:38%;height:100%;border-radius:99px;background:linear-gradient(90deg,#7c3aed,#e879f9,#f0abfc);box-shadow:0 0 14px #e879f9;animation:pupProgress 1.35s ease-in-out infinite}
+.pup-loader-status{margin-top:12px;color:#a78bfa;font-size:10px;font-weight:800;letter-spacing:.14em;text-transform:uppercase}
+.pup-loader-dots:after{content:"";animation:pupDots 1.4s steps(4,end) infinite}
+@keyframes pupFloat{0%,100%{transform:translateY(0) rotate(-2deg)}50%{transform:translateY(-8px) rotate(2deg)}}
+@keyframes pupGlow{from{opacity:.5;transform:scale(.88)}to{opacity:1;transform:scale(1.08)}}
+@keyframes pupProgress{0%{transform:translateX(-120%)}100%{transform:translateX(360%)}}
+@keyframes pupDots{0%{content:""}25%{content:"."}50%{content:".."}75%,100%{content:"..."}}
+@media(prefers-reduced-motion:reduce){#pup-loading-screen *,#pup-loading-screen:before{animation:none!important;transition:none!important}#pup-loading-screen .pup-loader-track span{width:100%}}
+
 </style>
 </head>
 <body>
+
+<div id="pup-loading-screen" role="status" aria-live="polite" aria-label="Loading Pandas PC Upgrade Plan">
+  <div class="pup-loader-glow" aria-hidden="true"></div>
+  <div class="pup-loader-content">
+    <div class="pup-loader-logo" aria-hidden="true">🛒</div>
+    <div class="pup-loader-kicker">PANDA MAN PRESENTS</div>
+    <div class="pup-loader-title">Pandas <span>PC Upgrade Plan</span></div>
+    <p class="pup-loader-caption">Getting your next upgrade ready…</p>
+    <div class="pup-loader-track" aria-hidden="true"><span></span></div>
+    <div class="pup-loader-status">Loading your setup<span class="pup-loader-dots"></span></div>
+  </div>
+</div>
+
 <header class="site-header" id="top">
 <a class="brand" href="#top" style="text-decoration:none"><span class="logo" aria-hidden="true">🛒</span><span class="brand-label">PANDAS PC UPGRADE PLAN</span></a>
 <nav class="site-nav" id="mainNavigation" aria-label="Main navigation">
@@ -177,5 +211,18 @@ async function copyShareLink(){
 const CHAT_API_BASE='https://pandas-pc-upgrade-chat.vercel.app/api';(function(){const q=id=>document.getElementById(id),launcher=q('siteChatLauncher'),panel=q('siteChatPanel'),close=q('siteChatClose'),messages=q('siteChatMessages'),form=q('siteChatForm'),textInput=q('siteChatText'),send=q('siteChatSend'),status=q('siteChatStatus');if(!launcher||!panel)return;let conversationId=localStorage.getItem('pupChatConversation')||'',pollHandle=null;const authHeaders=()=>({Authorization:'Bearer '+(window.pandaAccountToken?window.pandaAccountToken():localStorage.getItem('pandaAccountToken')||'')});function gate(){if(window.pandaRequireAccount&&!window.pandaRequireAccount())return false;if(!(window.pandaAccountToken?window.pandaAccountToken():localStorage.getItem('pandaAccountToken')))return false;return true}function lockChat(){launcher.textContent='🔒 Sign in to chat';status.textContent='Account required to use chat and voice calling.';}const seen=new Set();let chatHasLoaded=false;function ding(){try{const C=window.AudioContext||window.webkitAudioContext;if(!C)return;const c=new C(),o=c.createOscillator(),g=c.createGain();o.type='sine';o.frequency.setValueAtTime(880,c.currentTime);o.frequency.exponentialRampToValueAtTime(660,c.currentTime+.16);g.gain.setValueAtTime(.0001,c.currentTime);g.gain.exponentialRampToValueAtTime(.12,c.currentTime+.02);g.gain.exponentialRampToValueAtTime(.0001,c.currentTime+.22);o.connect(g);g.connect(c.destination);o.start();o.stop(c.currentTime+.23);o.onended=()=>c.close()}catch(e){}}function notifyUser(m){if('Notification'in window&&Notification.permission==='granted'){const n=new Notification('New reply from Panda',{body:m.text,tag:'pup-chat-reply'});n.onclick=()=>{window.focus();openChat(true);n.close()}}}const notifyButton=q('siteChatNotify');if(notifyButton)notifyButton.addEventListener('click',async()=>{if(!('Notification'in window)){status.textContent='Browser notifications are not supported here';return}const p=await Notification.requestPermission();status.textContent=p==='granted'?'Browser notifications enabled':'Notifications were not enabled'});function openChat(open){if(open&&!gate()){lockChat();return}panel.classList.toggle('open',open);panel.setAttribute('aria-hidden',String(!open));launcher.setAttribute('aria-expanded',String(open));if(open){textInput.focus();loadMessages();if(!pollHandle)pollHandle=setInterval(loadMessages,5000)}else if(pollHandle){clearInterval(pollHandle);pollHandle=null}}launcher.addEventListener('click',()=>openChat(!panel.classList.contains('open')));close.addEventListener('click',()=>openChat(false));function render(items){if(!items||!items.length)return;const empty=messages.querySelector('.site-chat-empty');if(empty)empty.remove();items.forEach(m=>{if(seen.has(m.id))return;seen.add(m.id);if(chatHasLoaded&&m.sender==='owner'){ding();notifyUser(m)}const row=document.createElement('div');row.className='site-chat-msg-row'+(m.sender==='visitor'?' mine':'');if(m.sender==='visitor'&&m.profilePicture){const avatar=document.createElement('img');avatar.className='site-chat-avatar';avatar.src=m.profilePicture;avatar.alt='Profile picture';row.appendChild(avatar)}const bubble=document.createElement('div');bubble.className='site-chat-msg'+(m.sender==='visitor'?' mine':'');const body=document.createElement('span');body.textContent=m.text;const meta=document.createElement('span');meta.className='meta';meta.textContent=(m.sender==='visitor'?'You':(m.senderName||'Site owner'))+' · '+new Date(m.createdAt).toLocaleTimeString([],{hour:'numeric',minute:'2-digit'});bubble.append(body,meta);row.appendChild(bubble);messages.appendChild(row)});chatHasLoaded=true;messages.scrollTop=messages.scrollHeight}async function request(path,options={}){if(CHAT_API_BASE.includes('YOUR-CHAT-BACKEND'))throw new Error('Chat backend is not connected yet.');const res=await fetch(CHAT_API_BASE+path,{...options,headers:{'Content-Type':'application/json',...authHeaders(),...(options.headers||{})}});const data=await res.json().catch(()=>({}));if(!res.ok)throw new Error(data.error||'Could not connect to chat.');return data}async function loadMessages(){if(!conversationId)return;try{const data=await request('/messages?conversationId='+encodeURIComponent(conversationId));render(data.messages||[]);status.textContent='Messages refresh automatically'}catch(e){status.textContent='Chat connection will be available soon'}}
 form.addEventListener('submit',async e=>{e.preventDefault();if(!gate()){lockChat();return}const text=textInput.value.trim();if(!text)return;send.disabled=true;try{const data=await request('/messages',{method:'POST',body:JSON.stringify({conversationId,text})});conversationId=data.conversationId;localStorage.setItem('pupChatConversation',conversationId);textInput.value='';render(data.messages||[]);await loadMessages();status.textContent='Message sent'}catch(err){status.textContent=err.message}finally{send.disabled=false}})})();
 </script>
+
+<script>
+(function(){
+  const loader=document.getElementById('pup-loading-screen');
+  if(!loader)return;
+  let finished=false;
+  function hideLoader(){if(finished)return;finished=true;loader.classList.add('pup-loaded');setTimeout(()=>loader.remove(),650)}
+  if(document.readyState==='complete')setTimeout(hideLoader,450);
+  else window.addEventListener('load',()=>setTimeout(hideLoader,450),{once:true});
+  setTimeout(hideLoader,5000);
+})();
+</script>
+
 </body>
 </html>
