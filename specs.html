@@ -24,12 +24,22 @@ header{display:flex;justify-content:space-between;align-items:center;gap:14px;pa
 .section-title{margin:24px 0 14px;text-align:center;font-size:24px;letter-spacing:-.04em}.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}.spec{padding:17px;border:1px solid var(--line);border-radius:15px;background:linear-gradient(145deg,#191326,#120e1b);min-width:0}.spec-top{display:flex;align-items:center;gap:12px;margin-bottom:9px}.icon{width:42px;height:42px;display:grid;place-items:center;border:1px solid #b69aff30;border-radius:12px;background:#b69aff10;font-size:21px;flex-shrink:0}.label{color:var(--muted);font-size:10px;text-transform:uppercase;letter-spacing:.12em;font-weight:800}.value{font-size:16px;font-weight:800;line-height:1.4;overflow-wrap:anywhere}.detail{font-size:12px;color:var(--muted);margin-top:5px}.notice{margin:18px 0 34px;padding:14px 16px;border:1px solid #b69aff30;border-radius:13px;background:#b69aff09;color:var(--muted);font-size:12px}.footer{border-top:1px solid #ffffff12;padding:20px 0 28px;color:var(--muted);font-size:12px;text-align:center}
 @media(max-width:600px){.wrap{width:calc(100% - 24px)}header{padding:13px 0;gap:8px}.brand{font-size:10px;gap:7px}.logo{width:34px;height:34px;font-size:18px}.actions{gap:5px}.button{padding:8px 10px;font-size:11px}.hero{padding:36px 0 20px}h1{font-size:clamp(35px,10vw,48px)}.hero p{font-size:14px}.grid{grid-template-columns:1fr;gap:9px}.spec{padding:14px}.section-title{font-size:21px}.value{font-size:15px}}
 @media(prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+
+/* Refined sticky navigation */
+.site-header{position:sticky;top:0;z-index:50;width:100%;padding:10px max(14px,calc((100% - 1000px)/2));display:grid;grid-template-columns:auto 1fr auto;gap:18px;align-items:center;border-bottom:1px solid #c084fc30;background:rgba(13,8,22,.86);backdrop-filter:blur(18px) saturate(140%);-webkit-backdrop-filter:blur(18px) saturate(140%);box-shadow:0 8px 30px #0002}
+.site-header .brand{white-space:nowrap;min-width:0}.site-header .brand-label{line-height:1.25}.site-nav{display:flex;align-items:center;justify-content:center;gap:5px;min-width:0}.site-nav a{display:inline-flex;align-items:center;justify-content:center;min-height:38px;padding:8px 11px;border:1px solid transparent;border-radius:10px;color:var(--muted);text-decoration:none;font-size:12px;font-weight:750;white-space:nowrap;transition:background .18s,border-color .18s,color .18s}.site-nav a:hover,.site-nav a:focus-visible{color:var(--text);background:#b69aff14;border-color:#b69aff35;outline:none}.site-nav a[aria-current="page"]{color:#f3e8ff;background:linear-gradient(120deg,#9333ea30,#d946ef18);border-color:#c084fc55}.site-header .header-actions,.site-header .actions{display:flex;align-items:center;gap:7px}.site-header .button{white-space:nowrap;min-height:40px}
+@media(max-width:850px){.site-header{grid-template-columns:auto 1fr;gap:8px 12px}.site-header .brand{grid-column:1;grid-row:1}.site-header .header-actions,.site-header .actions{grid-column:2;grid-row:1;justify-self:end}.site-nav{grid-column:1/-1;grid-row:2;justify-content:flex-start;overflow-x:auto;overscroll-behavior-x:contain;scrollbar-width:none;padding:2px 0 3px}.site-nav::-webkit-scrollbar{display:none}.site-nav a{flex:0 0 auto;min-height:36px;padding:7px 12px}}
+@media(max-width:420px){.site-header{padding:9px 11px;gap:7px}.site-header .logo{width:32px;height:32px;font-size:17px}.site-header .brand{font-size:10px;letter-spacing:0}.site-header .header-actions .button,.site-header .actions .button{min-height:36px;padding:7px 9px;font-size:11px}.site-nav a{font-size:11px;padding:7px 10px}}
+
 </style>
 </head>
 <body>
-<header class="wrap">
-<a class="brand" href="./index.html"><span class="logo">🛒</span><span>PANDAS PC UPGRADE PLAN</span></a>
-<div class="actions"><a class="button" href="./index.html">← Wishlist</a><button class="button" id="shareSite" type="button">↗ Share</button></div>
+<header class="site-header">
+<a class="brand" href="./index.html"><span class="logo" aria-hidden="true">🛒</span><span class="brand-label">PANDAS PC UPGRADE PLAN</span></a>
+<nav class="site-nav" aria-label="Main navigation">
+<a href="./index.html">Home</a><a href="./index.html#my-pc">My PC</a><a href="./index.html#parts">Wishlist</a><a href="./specs.html" aria-current="page">Full Specs</a>
+</nav>
+<div class="actions"><button class="button" id="shareSite" type="button">↗ Share</button></div>
 </header>
 <main class="wrap">
 <section class="hero">
