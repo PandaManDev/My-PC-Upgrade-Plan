@@ -218,11 +218,29 @@ form.addEventListener('submit',async e=>{e.preventDefault();if(!gate()){lockChat
   if(!loader)return;
   let finished=false;
   function hideLoader(){if(finished)return;finished=true;loader.classList.add('pup-loaded');setTimeout(()=>loader.remove(),650)}
-  // Keep the intro on screen long enough to enjoy the animation.
-  if(document.readyState==='complete')setTimeout(hideLoader,3500);
-  else window.addEventListener('load',()=>setTimeout(hideLoader,3500),{once:true});
+  // Show the complete intro sequence, including its staged progress animation.
+  const progress=loader.querySelector('.pup-loader-progress span');
+  const status=loader.querySelector('.pup-loader-status');
+  const messages=['Warming up the setup…','Checking the upgrade wishlist…','Polishing the neon lights…','Almost ready…'];
+  let messageIndex=0;
+  if(status){
+    status.textContent=messages[0];
+    const messageTimer=setInterval(()=>{
+      if(finished){clearInterval(messageTimer);return;}
+      messageIndex=(messageIndex+1)%messages.length;
+      status.textContent=messages[messageIndex];
+    },1800);
+  }
+  if(progress){
+    progress.style.width='0%';
+    progress.style.transition='width 8s cubic-bezier(.2,.7,.2,1)';
+    requestAnimationFrame(()=>requestAnimationFrame(()=>{progress.style.width='100%'}));
+  }
+  // Keep the animation visible for at least 8 seconds after the page is ready.
+  if(document.readyState==='complete')setTimeout(hideLoader,8000);
+  else window.addEventListener('load',()=>setTimeout(hideLoader,8000),{once:true});
   // Safety fallback: never leave the page stuck on the loader.
-  setTimeout(hideLoader,10000);
+  setTimeout(hideLoader,15000);
 })();
 </script>
 
