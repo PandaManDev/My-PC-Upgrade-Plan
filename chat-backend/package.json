@@ -1,12 +1,1 @@
-{
-  "name": "pandas-pc-upgrade-chat-backend",
-  "version": "1.1.0",
-  "private": true,
-  "description": "Custom two-way chat API and admin inbox for Pandas PC Upgrade Plan",
-  "engines": {
-    "node": ">=20"
-  },
-  "dependencies": {
-    "@vercel/blob": "^2.3.0"
-  }
-}
+{"name":"pandas-pc-upgrade-chat-backend","version":"1.2.0","private":true,"description":"Custom two-way chat API using Supabase","engines":{"node":">=20"},"dependencies":{"@supabase/supabase-js":"^2.57.0"}}
