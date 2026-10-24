@@ -1,0 +1,43 @@
+-- Run this whole file in Supabase Dashboard > SQL Editor.
+-- All access is server-side through SUPABASE_SERVICE_ROLE_KEY. No public client policies are created.
+create table if not exists public.chat_accounts (
+  email_hash text primary key,
+  id uuid not null unique,
+  email text not null,
+  salt text not null,
+  password_hash text not null,
+  display_name text not null default '',
+  profile_picture text not null default '',
+  created_at timestamptz not null default now(),
+  updated_at timestamptz,
+  wishlist jsonb not null default '{}'::jsonb
+);
+create table if not exists public.chat_conversations (
+  id uuid primary key,
+  owner_id uuid,
+  updated_at timestamptz not null default now()
+);
+create index if not exists chat_conversations_owner_updated_idx on public.chat_conversations(owner_id, updated_at desc);
+create table if not exists public.chat_messages (
+  id uuid primary key,
+  conversation_id uuid not null references public.chat_conversations(id) on delete cascade,
+  owner_id uuid,
+  sender text not null check (sender in ('visitor','owner')),
+  sender_name text not null default '',
+  profile_picture text not null default '',
+  text text not null,
+  ip_address text,
+  created_at timestamptz not null default now()
+);
+create index if not exists chat_messages_conversation_created_idx on public.chat_messages(conversation_id, created_at);
+create index if not exists chat_messages_owner_created_idx on public.chat_messages(owner_id, created_at desc);
+create table if not exists public.chat_calls (
+  conversation_id uuid primary key references public.chat_conversations(id) on delete cascade,
+  data jsonb not null,
+  updated_at timestamptz not null default now()
+);
+alter table public.chat_accounts enable row level security;
+alter table public.chat_conversations enable row level security;
+alter table public.chat_messages enable row level security;
+alter table public.chat_calls enable row level security;
+-- Deliberately no anon/authenticated policies. The backend secret key bypasses RLS.
