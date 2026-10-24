@@ -45,15 +45,26 @@ header{display:flex;justify-content:center;align-items:center;gap:20px;padding:2
 @media(max-width:700px){.dashboard{padding:16px;border-radius:17px;scroll-margin-top:120px}.dashboard-head{align-items:flex-start;flex-direction:column}.dashboard-grid{grid-template-columns:1fr 1fr;gap:9px}.dash-card{padding:13px}.dashboard-grid .dash-card:first-child{grid-column:1/-1}.dash-number{font-size:27px}.dash-costs{gap:8px}.dash-cost{padding:10px}.dash-cost strong{font-size:16px}}
 @media(max-width:380px){.dashboard-grid{grid-template-columns:1fr}.dashboard-grid .dash-card:first-child{grid-column:auto}.part .part-bottom{align-items:flex-start;flex-direction:row}.price-updated{text-align:right}}
 
+
+/* Accessible responsive navigation and mobile polish */
+.menu-button{display:none;align-items:center;gap:7px;border-color:#b69aff55;background:#b69aff10}
+.menu-icon{font-size:16px;line-height:1}
+.site-nav a:focus-visible,.button:focus-visible,.part-links a:focus-visible{outline:2px solid #f0abfc;outline-offset:3px}
+@media(min-width:851px){.site-header{grid-template-columns:minmax(210px,auto) 1fr auto}.site-nav{gap:7px}.site-nav a{padding-inline:13px}}
+@media(max-width:850px){.site-header{grid-template-columns:minmax(0,1fr) auto;gap:9px 12px;padding:10px max(14px,calc((100% - 1080px)/2))}.site-header .brand{grid-column:1;grid-row:1}.site-header .header-actions{grid-column:2;grid-row:1}.menu-button{display:inline-flex}.site-nav{grid-column:1/-1;grid-row:2;display:flex;justify-content:flex-start;gap:6px;overflow-x:auto;scrollbar-width:none;max-width:100%;padding:2px 0 4px}.site-nav::-webkit-scrollbar{display:none}.site-nav a{flex:0 0 auto}}
+@media(max-width:700px){.site-header{position:sticky;top:0;padding:9px 12px;gap:8px;background:rgba(13,8,22,.94)}.site-header .brand{font-size:clamp(10px,2.8vw,13px);gap:8px}.site-header .brand-label{max-width:145px;white-space:normal}.site-header .logo{width:34px;height:34px;font-size:17px;border-radius:11px}.site-header .header-actions{gap:6px}.site-header .header-actions .button{min-height:40px;padding:8px 10px;font-size:12px}.site-nav{border-top:1px solid transparent;transition:max-height .2s ease,opacity .2s ease,padding .2s ease;max-height:70px;opacity:1}.site-header:not(.menu-open) .site-nav{display:none}.site-header.menu-open .site-nav{display:flex;border-top-color:#b69aff28;padding-top:8px;padding-bottom:5px}.site-header.menu-open{box-shadow:0 12px 32px #0006}.site-nav a{min-height:40px;padding:9px 13px;border-radius:10px;font-size:12px}.hero{padding-top:30px}.dashboard{margin-bottom:28px}.part-links a{min-height:46px;font-size:13px}.spec strong{overflow-wrap:anywhere}}
+@media(max-width:360px){.site-header .brand-label{max-width:112px}.site-header .header-actions .button{padding:7px 8px;font-size:11px}.site-header .menu-label{display:none}.site-header .menu-icon{font-size:18px}.site-nav a{padding:8px 10px;font-size:11px}}
+@media(prefers-reduced-motion:reduce){.site-nav{transition:none}}
+
 </style>
 </head>
 <body>
 <header class="site-header" id="top">
 <a class="brand" href="#top" style="text-decoration:none"><span class="logo" aria-hidden="true">🛒</span><span class="brand-label">PANDAS PC UPGRADE PLAN</span></a>
-<nav class="site-nav" aria-label="Main navigation">
+<nav class="site-nav" id="mainNavigation" aria-label="Main navigation">
 <a href="#top" aria-current="page">Home</a><a href="#parts">Wishlist</a><a href="./specs.html">Full Specs ↗</a>
 </nav>
-<div class="header-actions"><button class="button share-button" id="shareSite" type="button" aria-label="Share Pandas PC Upgrade Plan">↗ Share</button></div>
+<div class="header-actions"><button class="button menu-button" id="menuToggle" type="button" aria-expanded="false" aria-controls="mainNavigation" aria-label="Open navigation menu"><span class="menu-icon" aria-hidden="true">☰</span><span class="menu-label">Menu</span></button><button class="button share-button" id="shareSite" type="button" aria-label="Share Pandas PC Upgrade Plan">↗ Share</button></div>
 </header>
 <main class="wrap">
 <section class="hero">
@@ -112,6 +123,14 @@ function updateTotals(){
 
 $('reset').addEventListener('click',()=>{if(confirm('Reset all prices and purchase checkmarks?')){state={};save();render()}});
 render();
+
+
+const menuToggle=$('menuToggle');
+const siteHeader=document.querySelector('.site-header');
+function closeMobileMenu(){siteHeader.classList.remove('menu-open');menuToggle.setAttribute('aria-expanded','false');menuToggle.setAttribute('aria-label','Open navigation menu');menuToggle.querySelector('.menu-icon').textContent='☰';menuToggle.querySelector('.menu-label').textContent='Menu'}
+menuToggle.addEventListener('click',()=>{const open=siteHeader.classList.toggle('menu-open');menuToggle.setAttribute('aria-expanded',String(open));menuToggle.setAttribute('aria-label',open?'Close navigation menu':'Open navigation menu');menuToggle.querySelector('.menu-icon').textContent=open?'✕':'☰';menuToggle.querySelector('.menu-label').textContent=open?'Close':'Menu'});
+document.querySelectorAll('#mainNavigation a').forEach(link=>link.addEventListener('click',closeMobileMenu));
+window.addEventListener('resize',()=>{if(window.innerWidth>700)closeMobileMenu()});
 
 const shareButton=$('shareSite');
 shareButton.addEventListener('click',async()=>{
