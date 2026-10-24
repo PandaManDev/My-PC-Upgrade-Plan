@@ -218,9 +218,11 @@ form.addEventListener('submit',async e=>{e.preventDefault();if(!gate()){lockChat
   if(!loader)return;
   let finished=false;
   function hideLoader(){if(finished)return;finished=true;loader.classList.add('pup-loaded');setTimeout(()=>loader.remove(),650)}
-  if(document.readyState==='complete')setTimeout(hideLoader,450);
-  else window.addEventListener('load',()=>setTimeout(hideLoader,450),{once:true});
-  setTimeout(hideLoader,5000);
+  // Keep the intro on screen long enough to enjoy the animation.
+  if(document.readyState==='complete')setTimeout(hideLoader,3500);
+  else window.addEventListener('load',()=>setTimeout(hideLoader,3500),{once:true});
+  // Safety fallback: never leave the page stuck on the loader.
+  setTimeout(hideLoader,10000);
 })();
 </script>
 
