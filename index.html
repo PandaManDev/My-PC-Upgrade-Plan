@@ -1042,3 +1042,174 @@ a.button.primary:hover,
   .dash-card:hover { transform: none; }
 }
 </style>
+
+
+<style id="galaxy-experience-polish">
+/* Cohesive galaxy atmosphere across the entire upgrade-planning experience */
+:root {
+  --bg: #070918;
+  --panel: #101329;
+  --panel2: #151a35;
+  --line: #343b70;
+  --purple: #a5b4fc;
+  --pink: #c4b5fd;
+  --text: #f1f5ff;
+  --muted: #a5b1d0;
+}
+html {
+  background: #070918;
+  scrollbar-color: #5550a7 #090b19;
+  scrollbar-width: thin;
+}
+body {
+  background:
+    radial-gradient(ellipse at 12% 4%, #6d28d91c, transparent 32rem),
+    radial-gradient(ellipse at 90% 24%, #2563eb12, transparent 35rem),
+    radial-gradient(ellipse at 48% 80%, #4338ca0d, transparent 42rem),
+    #070918;
+  color: #eef2ff;
+}
+body::before {
+  content: "";
+  position: fixed;
+  z-index: -1;
+  inset: 0;
+  pointer-events: none;
+  opacity: .28;
+  background-image:
+    radial-gradient(circle at 8% 18%, #e0e7ff 0 .7px, transparent 1.5px),
+    radial-gradient(circle at 28% 72%, #c4b5fd 0 .8px, transparent 1.6px),
+    radial-gradient(circle at 69% 31%, #ffffff 0 .7px, transparent 1.5px),
+    radial-gradient(circle at 91% 58%, #93c5fd 0 .8px, transparent 1.6px),
+    radial-gradient(circle at 53% 91%, #ffffff 0 .7px, transparent 1.5px);
+  background-size: 270px 250px, 340px 310px, 390px 280px, 310px 370px, 430px 360px;
+}
+header, .site-header {
+  border-color: #818cf829;
+}
+.logo {
+  border-color: #a5b4fcaa;
+  background: linear-gradient(135deg, #6d28d9, #4338ca 60%, #0369a1);
+  box-shadow: 0 0 26px #6366f145, inset 0 1px 0 #ffffff2a;
+}
+.brand small { color: #a5b4fc; }
+.hero h1 span {
+  background: linear-gradient(95deg, #c4b5fd 0%, #818cf8 42%, #67e8f9 100%);
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+}
+.kicker {
+  border-color: #818cf85c;
+  background: linear-gradient(110deg, #7c3aed20, #2563eb17);
+  color: #ddd6fe;
+  box-shadow: inset 0 1px 0 #ffffff0b;
+}
+.kicker .spark {
+  background: #67e8f9;
+  box-shadow: 0 0 9px #67e8f9, 0 0 17px #818cf8;
+}
+.hero p { color: #b9c3df; }
+.progress-card {
+  border-color: #818cf85c;
+  background:
+    radial-gradient(circle at 12% 15%, #ffffff80 0 .8px, transparent 1.5px),
+    radial-gradient(circle at 87% 25%, #c7d2fe80 0 .8px, transparent 1.6px),
+    radial-gradient(ellipse at 0% 0%, #7c3aed2e, transparent 58%),
+    linear-gradient(145deg, #151936, #0b0e20 78%);
+  box-shadow: 0 18px 60px #02061770, 0 0 28px #6366f11c, inset 0 1px 0 #ffffff12;
+}
+.progress-top { color: #a5b4fc; }
+.status {
+  color: #a5f3fc;
+  border-color: #67e8f94a;
+  background: #0891b20f;
+}
+.progress-number { color: #eef2ff; }
+.progress-number small { color: #a5b1d0; }
+.bar {
+  background: #24294b;
+  border: 1px solid #818cf82b;
+}
+.bar span {
+  background: linear-gradient(90deg, #7c3aed, #6366f1 52%, #38bdf8);
+  box-shadow: 0 0 15px #818cf87d;
+}
+.bar-meta { color: #a5b4fc; }
+.section-head h2,
+.specs h2,
+.parts-section h2,
+.budget h2 {
+  color: #eef2ff;
+  text-shadow: 0 0 24px #818cf817;
+}
+.section-head p,
+.specs p,
+.budget p { color: #a5b1d0; }
+.spec {
+  border-color: #818cf83b;
+  background:
+    radial-gradient(ellipse at 0% 0%, #7c3aed17, transparent 65%),
+    linear-gradient(145deg, #141832, #0b0e20);
+  box-shadow: inset 0 1px 0 #ffffff0b, 0 7px 20px #02061721;
+  transition: border-color .2s ease, transform .2s ease, box-shadow .2s ease;
+}
+.spec:hover {
+  border-color: #a5b4fc8a;
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px #02061742, 0 0 18px #6366f11b;
+}
+.spec strong { color: #dbeafe; }
+.spec span, .spec small { color: #a5b1d0; }
+.summary .metric,
+.metric {
+  border-color: #818cf83b;
+  background:
+    radial-gradient(ellipse at 0% 0%, #6366f11a, transparent 65%),
+    linear-gradient(145deg, #151a35, #0b0e20);
+  box-shadow: inset 0 1px 0 #ffffff0b, 0 7px 20px #02061724;
+}
+.metric strong { color: #c7d2fe; }
+.metric span, .metric small { color: #a5b1d0; }
+.budget {
+  border-color: #818cf852;
+  background:
+    radial-gradient(ellipse at 0% 0%, #7c3aed24, transparent 55%),
+    radial-gradient(ellipse at 100% 100%, #2563eb1c, transparent 55%),
+    linear-gradient(145deg, #141832, #0b0e20);
+  box-shadow: 0 16px 44px #0206174d, inset 0 1px 0 #ffffff10;
+}
+.budget input,
+.budget select,
+input,
+textarea,
+select {
+  color-scheme: dark;
+}
+input:not([type="checkbox"]):not([type="radio"]),
+textarea,
+select {
+  border-color: #818cf847;
+  background-color: #0a0e20;
+  color: #eef2ff;
+}
+input:focus-visible,
+textarea:focus-visible,
+select:focus-visible {
+  outline: 2px solid #67e8f9;
+  outline-offset: 2px;
+}
+.footer {
+  border-color: #818cf829;
+  color: #9caaca;
+}
+.footer a { color: #c4b5fd; text-underline-offset: 3px; }
+::selection { background: #6366f16b; color: #fff; }
+@media (hover: none) {
+  .spec:hover { transform: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .spec { transition: none; }
+  .spec:hover { transform: none; }
+}
+</style>
