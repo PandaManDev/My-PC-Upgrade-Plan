@@ -62,3 +62,19 @@ The chat code then calls `/messages`; voice code should call `/call`. Only make 
 ## Current status
 
 The function and setup instructions are source files only until deployed to Supabase and tested. The repository's current `index.html` still points to the former Vercel API, so the migration is not complete yet.
+
+
+## 6. Secure gift-address reveal
+
+The wishlist now has separate **Preview Product** and **Gift This Part** actions. Preview opens the retailer directly and does not reveal any address. Gift This Part opens `gift.html`; after a valid key is accepted, the shipping address is returned by the Edge Function and the visitor can continue to that exact retailer product.
+
+Before this feature can work live:
+
+1. Run `supabase/gift_access_attempts.sql` in the Supabase SQL Editor. This creates only a dedicated rate-limit table; it does not alter or delete existing chat/account data.
+2. In Supabase Dashboard → Edge Function secrets, add:
+   - `GIFT_AUTH_KEY`: a long, random private key that you give only to intended gift buyers.
+   - `GIFT_SHIPPING_ADDRESS`: your complete shipping address, as plain text with line breaks if desired.
+3. Redeploy the existing function: `supabase functions deploy pup-api --no-verify-jwt`.
+4. Confirm an incorrect key returns an error and a correct key reveals the address. Eight failed attempts from one network address trigger a 30-minute block.
+
+Do not put either secret in `index.html`, `gift.html`, or any committed file. The address is not in the public source. This is a shared-key gate, not identity verification; anyone who receives the key can reveal the address, so share it only with people you trust.
