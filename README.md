@@ -11,13 +11,13 @@ Welcome to my PC Upgrade Plan! This project tracks my PC upgrade wishlist and re
 
 ## 🔐 Gift Access
 
-The gift access key is configured privately through GitHub Actions and Supabase secrets. It is intentionally not published in this README.
+PUP-GIFT-7fK9xQ2mV8nR4pL6wT3zH5cB
 
 ## 📬 Admin Account Information
 
 - **Admin Panel:** https://pandamandev.github.io/My-PC-Upgrade-Plan/admin.html
 - **Admin Email:** `jjb@petlover.com`
-- **Admin Password:** Stored privately; it is not published in this README.
+- **Admin Password:** `fdgdgrdgrdgrgrdgdrg`
 
 ### How to Sign In
 
