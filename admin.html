@@ -97,6 +97,19 @@ html,body,.app,main{background:#080808!important;color:#f5f5f5}
 .auth-card .inbox-status{padding:12px 0 0}
 @media(max-width:520px){.auth-gate{padding:16px}.auth-card{padding:22px;border-radius:16px}}
 
+
+/* Large access-denied popup */
+.admin-error-overlay{position:fixed;inset:0;z-index:9999;display:grid;place-items:center;padding:22px;background:rgba(0,0,0,.78);backdrop-filter:blur(7px)}
+.admin-error-overlay[hidden]{display:none!important}
+.admin-error-dialog{position:relative;width:min(100%,560px);padding:36px 30px 30px;text-align:center;border:1px solid #773535;border-radius:24px;background:linear-gradient(155deg,#241313,#111);box-shadow:0 28px 100px #000b,0 0 44px #ff333322;animation:adminErrorPop .2s ease-out}
+.admin-error-icon{display:grid;place-items:center;width:76px;height:76px;margin:0 auto 20px;border:2px solid #ff5d5d;border-radius:50%;color:#ff6868;font-size:52px;font-weight:800;line-height:1}
+.admin-error-dialog h2{margin:0 0 12px;color:#fff;font-size:clamp(25px,5vw,34px);letter-spacing:-.7px}
+.admin-error-dialog p{margin:0;color:#d5c4c4;font-size:16px;line-height:1.65}
+.admin-error-close{position:absolute;top:12px;right:12px;display:grid;place-items:center;width:42px;height:42px;border:1px solid #5b4242;border-radius:12px;background:#211717;color:#fff;font-size:28px;cursor:pointer}
+.admin-error-close:hover{background:#512222;border-color:#ff6868}
+@keyframes adminErrorPop{from{opacity:0;transform:translateY(10px) scale(.96)}to{opacity:1;transform:translateY(0) scale(1)}}
+@media(max-width:520px){.admin-error-dialog{padding:34px 20px 24px;border-radius:20px}.admin-error-icon{width:66px;height:66px;font-size:44px}}
+
 </style>
 </head>
 <body>
@@ -113,6 +126,16 @@ html,body,.app,main{background:#080808!important;color:#f5f5f5}
   </div>
   </div>
 </div>
+
+<div class="admin-error-overlay" id="adminErrorPopup" hidden role="presentation">
+  <section class="admin-error-dialog" role="alertdialog" aria-modal="true" aria-labelledby="adminErrorTitle" aria-describedby="adminErrorMessage">
+    <button class="admin-error-close" id="adminErrorClose" type="button" aria-label="Close error message">&times;</button>
+    <div class="admin-error-icon" aria-hidden="true">×</div>
+    <h2 id="adminErrorTitle">Access denied</h2>
+    <p id="adminErrorMessage">Sorry, but you are not an administrator. Please use an administrator account.</p>
+  </section>
+</div>
+
 <div class="app" id="adminApp" hidden>
 <header class="topbar">
   <a class="brand" href="./" aria-label="Panda PC Upgrade Plan home"><span class="logo">🐼</span><span>Panda PC Support<small>Website messages</small></span></a>
@@ -149,13 +172,20 @@ async function apiRequest(path,options={}){const response=await fetch(API_BASE+p
 async function adminApi(url){return apiRequest(url,{method:'GET',headers:adminHeaders()});}
 function safeDate(value){try{return new Date(value).toLocaleString()}catch{return value||''}}
 function renderConversations(){const list=$('conversationList');list.replaceChildren();$('conversationCount').textContent=conversationCache.length+' conversation'+(conversationCache.length===1?'':'s');if(!conversationCache.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No conversations found.';list.append(empty);return;}for(const conv of conversationCache){const b=document.createElement('button');b.type='button';b.className='conv-item'+(conv.conversationId===activeConversation?' active':'');const title=document.createElement('strong');title.textContent=conv.visitorName||'Website visitor';const detail=document.createElement('small');detail.textContent=(conv.visitorIpAddress?'IP '+conv.visitorIpAddress+' · ':'')+(conv.lastMessage?.text||'No messages yet').slice(0,90)+' · '+safeDate(conv.updatedAt);b.append(title,detail);b.addEventListener('click',()=>openConversation(conv.conversationId));list.append(b);}}
+
+function showAdminError(){const popup=$('adminErrorPopup');popup.hidden=false;$('adminErrorClose').focus();}
+function closeAdminError(){$('adminErrorPopup').hidden=true;}
+$('adminErrorClose').addEventListener('click',closeAdminError);
+$('adminErrorPopup').addEventListener('click',e=>{if(e.target===$('adminErrorPopup'))closeAdminError();});
+window.addEventListener('keydown',e=>{if(e.key==='Escape'&&!$('adminErrorPopup').hidden)closeAdminError();});
+
 function showSignedIn(){
   $('authGate').hidden=!!adminToken;
   $('adminApp').hidden=!adminToken;
   $('adminSession').hidden=!adminToken;
   $('signedInAs').textContent=adminToken?'Signed in as '+adminEmail:'';
 }
-async function signIn(){const email=$('adminEmail').value.trim().toLowerCase(),password=$('adminPassword').value;if(!email||!password){loginStatus('Enter your website account email and password.',true);return;}if(email!==ADMIN_LOGIN_EMAIL){loginStatus('This inbox is restricted to its authorized administrator account.',true);return;}$('adminSignIn').disabled=true;loginStatus('Signing in…');try{const data=await apiRequest('/account',{method:'POST',body:JSON.stringify({action:'login',email,password})});if(!data.token)throw new Error('The sign-in response did not include a session.');adminToken=data.token;adminEmail=data.user?.email||email;sessionStorage.setItem('pup_admin_session_token',adminToken);sessionStorage.setItem('pup_admin_session_email',adminEmail);$('adminPassword').value='';showSignedIn();loginStatus('Signed in. Checking administrator permission…');await loadConversations();}catch(e){adminToken='';adminEmail='';sessionStorage.removeItem('pup_admin_session_token');sessionStorage.removeItem('pup_admin_session_email');showSignedIn();loginStatus(e.message,true);}finally{$('adminSignIn').disabled=false;}}
+async function signIn(){const email=$('adminEmail').value.trim().toLowerCase(),password=$('adminPassword').value;if(!email||!password){loginStatus('Enter your website account email and password.',true);return;}if(email!==ADMIN_LOGIN_EMAIL){showAdminError();return;}$('adminSignIn').disabled=true;loginStatus('Signing in…');try{const data=await apiRequest('/account',{method:'POST',body:JSON.stringify({action:'login',email,password})});if(!data.token)throw new Error('The sign-in response did not include a session.');adminToken=data.token;adminEmail=data.user?.email||email;sessionStorage.setItem('pup_admin_session_token',adminToken);sessionStorage.setItem('pup_admin_session_email',adminEmail);$('adminPassword').value='';showSignedIn();loginStatus('Signed in. Checking administrator permission…');await loadConversations();}catch(e){adminToken='';adminEmail='';sessionStorage.removeItem('pup_admin_session_token');sessionStorage.removeItem('pup_admin_session_email');showSignedIn();loginStatus(e.message,true);}finally{$('adminSignIn').disabled=false;}}
 function signOut(){adminToken='';adminEmail='';sessionStorage.removeItem('pup_admin_session_token');sessionStorage.removeItem('pup_admin_session_email');conversationCache=[];activeConversation='';renderConversations();$('chatMessages').replaceChildren();const empty=document.createElement('div');empty.className='empty';empty.textContent='Sign in and select a conversation to read messages.';$('chatMessages').append(empty);showSignedIn();inboxStatus('Signed out.');loginStatus('Sign in to securely open the inbox.');}
 async function loadConversations(){if(!adminToken){inboxStatus('Sign in to your website account first.',true);return;}$('reloadChats').disabled=true;inboxStatus('Loading conversations…');try{const data=await adminApi('/messages');conversationCache=data.conversations||[];renderConversations();$('reloadChats').disabled=false;inboxStatus('Loaded '+conversationCache.length+' conversation(s). Select one to read the full chat.');if(activeConversation&&!conversationCache.some(c=>c.conversationId===activeConversation))activeConversation='';if(!activeConversation&&conversationCache.length)await openConversation(conversationCache[0].conversationId);}catch(e){if(/sign in|administrator|authorized|permission/i.test(e.message)){adminToken='';adminEmail='';sessionStorage.removeItem('pup_admin_session_token');sessionStorage.removeItem('pup_admin_session_email');showSignedIn();}inboxStatus(e.message+' Ensure the admin email is configured in Supabase and pup-api is redeployed.',true);$('conversationList').replaceChildren();const empty=document.createElement('div');empty.className='empty';empty.textContent='Could not load conversations.';$('conversationList').append(empty);}finally{$('reloadChats').disabled=false;}}
 async function openConversation(id){activeConversation=id;renderConversations();const selected=conversationCache.find(c=>c.conversationId===id);$('chatTitle').textContent=selected?.visitorName||'Website visitor';$('chatSubtitle').textContent='Visitor IP: '+(selected?.visitorIpAddress||'Unavailable for existing messages')+' · Last activity '+safeDate(selected?.updatedAt);const view=$('chatMessages');view.replaceChildren();const loading=document.createElement('div');loading.className='empty';loading.textContent='Loading messages…';view.append(loading);try{const data=await adminApi('/messages?conversationId='+encodeURIComponent(id));view.replaceChildren();const messages=data.messages||[];if(!messages.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No messages in this conversation yet.';view.append(empty);}for(const msg of messages){const item=document.createElement('article');item.className='chat-message '+(msg.sender==='owner'?'from-owner':'from-visitor');const meta=document.createElement('small');meta.textContent=(msg.sender==='owner'?'Panda PC Support':(msg.senderName||'Visitor'))+' · '+safeDate(msg.createdAt)+(msg.sender==='visitor'?' · IP: '+(msg.ipAddress||selected?.visitorIpAddress||'Unavailable'):'');const body=document.createElement('p');body.textContent=msg.text||'';item.append(meta,body);view.append(item);}const replyForm=document.createElement('form');replyForm.className='reply-form';replyForm.style.cssText='display:flex;gap:8px;position:sticky;bottom:0;padding:12px 0;background:#101010;';const reply=document.createElement('textarea');reply.rows=2;reply.maxLength=1500;reply.required=true;reply.placeholder='Write a reply to this visitor…';reply.setAttribute('aria-label','Reply to visitor');reply.style.cssText='flex:1;min-width:0;resize:vertical;background:#101010;color:#f5f5f5;border:1px solid #d4d4d4;border-radius:10px;padding:10px;font:inherit;';const sendReply=document.createElement('button');sendReply.type='submit';sendReply.className='btn primary';sendReply.textContent='Send reply';replyForm.append(reply,sendReply);const replyStatus=document.createElement('div');replyStatus.className='inbox-status';replyStatus.style.width='100%';replyForm.addEventListener('submit',async e=>{e.preventDefault();const text=reply.value.trim();if(!text)return;sendReply.disabled=true;replyStatus.textContent='Sending reply…';try{await apiRequest('/messages',{method:'POST',headers:adminHeaders(),body:JSON.stringify({action:'reply',conversationId:id,text})});reply.value='';replyStatus.textContent='Reply sent. The visitor will see it in their chat.';await openConversation(id);inboxStatus('Reply sent successfully.');}catch(err){replyStatus.textContent=err.message;replyStatus.classList.add('error');}finally{sendReply.disabled=false;}});view.append(replyForm,replyStatus);view.scrollTop=view.scrollHeight;}catch(e){view.replaceChildren();const empty=document.createElement('div');empty.className='empty';empty.textContent=e.message;view.append(empty);inboxStatus('Could not open conversation.',true);}}$('adminLoginForm').addEventListener('submit',e=>{e.preventDefault();signIn();});
