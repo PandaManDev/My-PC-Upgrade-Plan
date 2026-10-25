@@ -138,7 +138,7 @@ Deno.serve(async (req) => {
   if (!SUPABASE_URL || !SERVICE_KEY || !AUTH_SECRET) return json({ error: "Supabase API is not configured. Set SUPABASE_URL, SUPABASE_SECRET_KEY, and CHAT_AUTH_SECRET in Supabase Edge Function secrets." }, 503, origin);
   if (!["GET", "POST"].includes(req.method)) return json({ error: "Method not allowed." }, 405, origin);
   try {
-    const url = new URL(req.url), route = url.pathname.split("/").filter(Boolean).slice(1).join("/");
+    const url = new URL(req.url), route = url.pathname.split("/").filter(Boolean).at(-1) || "";
     let result: any;
     if (route === "account") result = await account(req, url);
     else if (route === "messages") result = await messages(req, url);
