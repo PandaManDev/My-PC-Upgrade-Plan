@@ -435,3 +435,47 @@ button, input, select, textarea { max-width: 100%; }
   .section-head { gap: 10px; }
 }
 </style>
+
+
+<style id="desktop-layout-refinement">
+/* Desktop polish: wider canvas, balanced grids, and clearer hierarchy */
+@media (min-width: 851px) {
+  .wrap { width: min(1200px, calc(100% - 64px)); }
+  .site-header { padding-inline: max(32px, calc((100% - 1200px) / 2)); gap: 22px; }
+  .site-header .brand { gap: 12px; }
+  .site-nav { gap: 5px; }
+  .site-nav a { padding-inline: 11px; font-size: 12px; }
+  .hero { padding: 68px 0 42px; max-width: 900px; margin-inline: auto; }
+  .hero h1 { max-width: 900px; font-size: clamp(54px, 5.2vw, 72px); }
+  .hero p { max-width: 62ch; font-size: 17px; line-height: 1.75; }
+  .dashboard { padding: 28px; margin-bottom: 46px; border-radius: 24px; }
+  .dashboard-head { margin-bottom: 22px; }
+  .dashboard-grid { grid-template-columns: 1.25fr 1fr 1fr; gap: 16px; }
+  .dash-card { padding: 20px; }
+  .dash-number { font-size: clamp(30px, 3vw, 40px); }
+  .specs { margin-bottom: 48px; }
+  .spec-grid { grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 14px; }
+  .spec { padding: 18px; border-radius: 15px; }
+  .spec strong { font-size: 14px; }
+  .summary { gap: 16px; margin: 24px 0 54px; }
+  .metric { padding: 20px 22px; border-radius: 16px; }
+  .metric strong { font-size: 29px; }
+  .parts-section { padding-bottom: 12px; }
+  .parts-section .section-head { margin-bottom: 22px; }
+  .parts-section .section-head h2 { font-size: 30px; }
+  .parts { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 18px; }
+  .part { padding: 22px; border-radius: 19px; min-height: 100%; }
+  .part-icon { height: 94px; font-size: 48px; margin: 12px 0; }
+  .part h3 { font-size: 18px; line-height: 1.4; }
+  .part p { font-size: 13px; line-height: 1.7; }
+  .part .part-bottom { margin-top: auto; }
+  .part-links { gap: 10px; }
+  .part-links a { padding: 11px 9px; font-size: 12px; }
+  .budget { margin: 48px 0; padding: 28px 32px; border-radius: 20px; }
+  .footer { padding-block: 28px 36px; }
+}
+@media (min-width: 1200px) {
+  .parts { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; gap: 20px; }
+  .part { padding: 24px; }
+}
+</style>
