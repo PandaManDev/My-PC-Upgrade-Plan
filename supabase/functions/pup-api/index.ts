@@ -82,7 +82,7 @@ async function messages(req: Request, url: URL) {
     return { error: "Administrator access required to view all conversations. Check the CHAT_ADMIN_EMAIL Supabase secret and redeploy pup-api.", status: 403 };
   }
   const clientIp = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim().slice(0, 100) || "Unknown";
-  const publicMessage = (m: any) => ({ id: m.id, conversationId: m.conversation_id, sender: m.sender, senderName: m.sender_name, profilePicture: m.profile_picture, text: m.text, createdAt: m.created_at });
+  const publicMessage = (m: any, includeIp = isAdmin) => ({ id: m.id, conversationId: m.conversation_id, sender: m.sender, senderName: m.sender_name, profilePicture: m.profile_picture, text: m.text, createdAt: m.created_at, ...(includeIp && m.ip_address ? { ipAddress: String(m.ip_address).slice(0, 100) } : {}) });
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
   if (req.method === "POST" && isAdmin) {
     if (body.action !== "reply") return { error: "Admin accounts can only send replies from the admin inbox.", status: 405 };
@@ -128,7 +128,7 @@ async function messages(req: Request, url: URL) {
     let query = db.from("chat_conversations").select("*").order("updated_at", { ascending: false }).limit(200);
     if (!isAdmin) query = query.eq("owner_id", session!.sub);
     const { data: convs, error } = await query; if (error) throw error;
-    const conversations = await Promise.all((convs || []).map(async c => { const { data: ms } = await db.from("chat_messages").select("*").eq("conversation_id", c.id).order("created_at", { ascending: true }).limit(500); const list = ms || [], last = list[list.length - 1]; return { conversationId: c.id, updatedAt: c.updated_at || last?.created_at || "", lastMessage: last ? publicMessage(last) : null, messagesCount: list.length }; }));
+    const conversations = await Promise.all((convs || []).map(async c => { const { data: ms } = await db.from("chat_messages").select("*").eq("conversation_id", c.id).order("created_at", { ascending: true }).limit(500); const list = ms || [], last = list[list.length - 1], firstVisitor = list.find((m: any) => m.sender === "visitor"); return { conversationId: c.id, updatedAt: c.updated_at || last?.created_at || "", visitorName: firstVisitor?.sender_name || "Website visitor", visitorIpAddress: firstVisitor?.ip_address || null, lastMessage: last ? publicMessage(last) : null, messagesCount: list.length }; }));
     return { conversations };
   }
   if (!validId(id)) return { error: "Invalid conversation ID.", status: 400 };
