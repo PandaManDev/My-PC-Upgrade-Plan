@@ -778,3 +778,171 @@ button, input, select, textarea { max-width: 100%; }
 }
 #partsGrid .part-links a:focus-visible { outline-color: #67e8f9; }
 </style>
+
+
+<style id="galaxy-all-buttons">
+/* Apply the same galaxy look throughout the site, not just the wishlist cards */
+:root {
+  --galaxy-violet: #8b5cf6;
+  --galaxy-indigo: #6366f1;
+  --galaxy-blue: #38bdf8;
+  --galaxy-text: #eef2ff;
+}
+button,
+a.button,
+.button,
+.site-nav a,
+.account-close,
+.account-tabs button,
+.account-name-controls button,
+.account-picture-controls button,
+.account-chat-history button,
+.site-chat-launcher,
+.site-chat-close,
+.site-chat-send,
+.back-to-top {
+  border: 1px solid #818cf85c;
+  border-radius: 12px;
+  background:
+    radial-gradient(ellipse at 12% 0%, #a78bfa22, transparent 55%),
+    linear-gradient(135deg, #171a38 0%, #12152b 58%, #0b1020 100%);
+  color: #e0e7ff;
+  box-shadow: inset 0 1px 0 #ffffff0d, 0 5px 16px #02061726;
+  transition: background .18s ease, border-color .18s ease, box-shadow .18s ease, color .18s ease, transform .18s ease;
+}
+button:not(:disabled),
+a.button,
+.button,
+.site-nav a,
+.account-close,
+.site-chat-launcher,
+.site-chat-close,
+.site-chat-send,
+.back-to-top {
+  cursor: pointer;
+}
+button:hover:not(:disabled),
+a.button:hover,
+.button:hover,
+.site-nav a:hover,
+.account-close:hover,
+.account-tabs button:hover,
+.account-name-controls button:hover,
+.account-picture-controls button:hover,
+.account-chat-history button:hover,
+.site-chat-close:hover,
+.site-chat-send:hover,
+.back-to-top:hover {
+  border-color: #a5b4fcce;
+  background:
+    radial-gradient(ellipse at 10% 0%, #a78bfa3b, transparent 58%),
+    linear-gradient(135deg, #27214d 0%, #1a2450 60%, #10263d 100%);
+  color: #ffffff;
+  box-shadow: 0 0 0 1px #818cf81c, 0 7px 20px #4f46e52e, inset 0 1px 0 #ffffff18;
+}
+button:active:not(:disabled),
+a.button:active,
+.button:active,
+.site-nav a:active,
+.site-chat-launcher:active,
+.site-chat-send:active {
+  transform: translateY(1px);
+}
+button:focus-visible,
+a.button:focus-visible,
+.button:focus-visible,
+.site-nav a:focus-visible,
+.account-close:focus-visible,
+.site-chat-launcher:focus-visible,
+.site-chat-close:focus-visible,
+.site-chat-send:focus-visible,
+.back-to-top:focus-visible {
+  outline: 2px solid #67e8f9;
+  outline-offset: 3px;
+}
+button:disabled {
+  cursor: not-allowed;
+  opacity: .55;
+  filter: saturate(.65);
+}
+/* Primary actions get a brighter nebula gradient */
+button.primary,
+a.button.primary,
+.button.primary,
+#accountSubmit,
+#accountLogout,
+#adminPageButton,
+.site-chat-send,
+#shareSite {
+  border-color: #a5b4fc60;
+  background: linear-gradient(115deg, #6d28d9 0%, #4f46e5 54%, #0369a1 100%);
+  color: #fff;
+  box-shadow: 0 5px 18px #4f46e538, inset 0 1px 0 #ffffff20;
+}
+button.primary:hover:not(:disabled),
+a.button.primary:hover,
+.button.primary:hover,
+#accountSubmit:hover,
+#accountLogout:hover,
+#adminPageButton:hover,
+.site-chat-send:hover,
+#shareSite:hover {
+  border-color: #c4b5fd;
+  background: linear-gradient(115deg, #7c3aed 0%, #6366f1 54%, #0284c7 100%);
+  box-shadow: 0 7px 23px #6366f14a, inset 0 1px 0 #ffffff2e;
+}
+/* Navigation pills and account tabs */
+.site-nav a {
+  border-color: transparent;
+  background: #818cf80a;
+  box-shadow: none;
+  text-decoration: none;
+}
+.site-nav a:hover,
+.site-nav a.active,
+.site-nav a[aria-current="page"] {
+  border-color: #818cf85c;
+  background: linear-gradient(115deg, #7c3aed2b, #2563eb26);
+  color: #f5f3ff;
+}
+.account-tabs button.active,
+#accountLoginTab.active,
+#accountRegisterTab.active {
+  border-color: #a5b4fcb0;
+  background: linear-gradient(115deg, #6d28d9, #4338ca 60%, #075985);
+  color: #fff;
+}
+/* Small utility / close buttons keep the theme without overpowering the page */
+.account-close,
+.site-chat-close {
+  background: linear-gradient(135deg, #1b1b3b, #10182b);
+}
+.site-chat-footnote {
+  background: transparent !important;
+  border-color: transparent !important;
+  color: #c4b5fd !important;
+  box-shadow: none !important;
+}
+.site-chat-footnote:hover {
+  color: #67e8f9 !important;
+  background: #818cf812 !important;
+}
+.site-chat-launcher {
+  border-color: #a5b4fc99;
+  background: linear-gradient(130deg, #6d28d9, #4338ca 58%, #0369a1);
+  color: #fff;
+  box-shadow: 0 8px 24px #4f46e54a, inset 0 1px 0 #ffffff24;
+}
+.site-chat-launcher:hover {
+  background: linear-gradient(130deg, #7c3aed, #4f46e5 58%, #0284c7);
+  box-shadow: 0 10px 28px #6366f15c, inset 0 1px 0 #ffffff30;
+}
+@media (prefers-reduced-motion: reduce) {
+  button, a.button, .button, .site-nav a, .account-close,
+  .account-tabs button, .account-name-controls button,
+  .account-picture-controls button, .account-chat-history button,
+  .site-chat-launcher, .site-chat-close, .site-chat-send, .back-to-top {
+    transition: none;
+  }
+}
+</style>
