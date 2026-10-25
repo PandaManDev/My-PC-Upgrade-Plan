@@ -107,7 +107,7 @@ body.proxy-access-blocked{overflow:hidden}
     <div class="proxy-denied-icon" aria-hidden="true">⛔</div>
     <div class="proxy-denied-label">Access restricted</div>
     <h2 id="proxyDeniedTitle">Access Denied</h2>
-    <p id="proxyDeniedMessage">This website does not allow connections detected as proxies. Turn off your proxy and reload the page to try again.</p>
+    <p id="proxyDeniedMessage">This website does not allow connections detected as proxies, VPNs, or Tor. Turn off the anonymizing connection and reload the page to try again.</p>
     <p class="proxy-denied-note">The connection check uses your public IP address to look for known proxy services. Detection can make mistakes, and unavailable checks do not automatically block access.</p>
   </div>
 </div>
@@ -269,21 +269,26 @@ form.addEventListener('submit',async e=>{e.preventDefault();if(!gate()){lockChat
   }
   async function checkConnection(){
     const controller=new AbortController();
-    const timer=setTimeout(()=>controller.abort(),6500);
+    const timer=setTimeout(()=>controller.abort(),9000);
     try{
-      // ipapi.is checks the visitor's public IP and reports known proxy flags.
-      const response=await fetch('https://api.ipapi.is/',{
-        method:'GET',
-        headers:{'Accept':'application/json'},
-        cache:'no-store',
-        signal:controller.signal
+      // Anonymous ipapi.is requests return the visitor IP only. The server-side
+      // endpoint performs the keyed lookup so the API key is never exposed here.
+      const ipResponse=await fetch('https://api.ipapi.is/',{
+        method:'GET',headers:{'Accept':'application/json'},cache:'no-store',signal:controller.signal
       });
-      if(!response.ok)return;
-      const data=await response.json();
-      if(data && data.is_proxy===true)deny();
+      if(!ipResponse.ok)return;
+      const ipData=await ipResponse.json();
+      if(!ipData || typeof ipData.ip!=='string' || !ipData.ip)return;
+      const checkResponse=await fetch('https://jitmbvmeeyqjekyxaluk.supabase.co/functions/v1/pup-api/security-check',{
+        method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',signal:controller.signal,
+        body:JSON.stringify({ip:ipData.ip})
+      });
+      if(!checkResponse.ok)return;
+      const result=await checkResponse.json();
+      if(result && (result.is_proxy===true || result.is_vpn===true || result.is_tor===true))deny();
     }catch(error){
-      // Fail open if the detection service is blocked, offline, or rate-limited.
-      console.warn('Proxy check unavailable; allowing the page to load.');
+      // Fail open if the detection service is blocked, offline, or not configured.
+      console.warn('Proxy/VPN check unavailable; allowing the page to load.');
     }finally{
       clearTimeout(timer);
     }
