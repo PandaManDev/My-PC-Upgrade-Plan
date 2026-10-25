@@ -11,7 +11,7 @@ Welcome to my PC Upgrade Plan! This project tracks my PC upgrade wishlist and re
 
 ## 🔐 Gift Access
 
-PUP-GIFT-7fK9xQ2mV8nR4pL6wT3zH5cB
+`PUP-GIFT-7fK9xQ2mV8nR4pL6wT3zH5cB`
 
 ## 📬 Admin Account Information
 
