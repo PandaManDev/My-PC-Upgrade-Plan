@@ -1276,3 +1276,35 @@ header, main, footer, .container, .app, .dashboard, section { position:relative;
 }
 </style>
 
+
+
+<style id="panda-cosmic-dashboard-redesign">
+:root{--cosmic-violet:#8b35ff;--cosmic-purple:#641cff;--cosmic-cyan:#24dfff;--cosmic-border:rgba(117,74,255,.72)}
+html{background:#030514}
+body{
+ color:#f4f1ff!important;
+ background:#030514 url("https://images.openai.com/static-rsc-4/UdkT0h_oV2ms-H1PRUsBk5Yewn2QIpt7be4O-3fqsqrI_C2wQ8LfLJmXG_QjW79A01x5ys0jMvQvHXV2-mw6tTfXcmfc1CwSj_wT2QzMb_Fyn59MpqL98mnpIHSbCBnsBRe5Z18KbkBvPHLK3VZ0Lsg_yjxuC71plIR5AVXLtrWYyRq9cUZ3SwZW5jhNqpE6?purpose=fullsize") center center/cover fixed no-repeat!important;
+ position:relative;isolation:isolate
+}
+body:before{content:"";position:fixed;inset:0;z-index:-1;pointer-events:none;background:linear-gradient(90deg,rgba(2,4,22,.48),rgba(3,4,22,.60) 48%,rgba(2,4,22,.48)),linear-gradient(180deg,rgba(3,4,22,.15),rgba(3,4,22,.58))}
+header,nav,.navbar,.topbar{background:rgba(4,5,25,.88)!important;backdrop-filter:blur(18px);border-bottom:1px solid rgba(123,64,255,.65)!important}
+main,.container,.app,.dashboard,.content{color:#f4f1ff}
+section,.card,.dash-card,.progress-card,.summary-card,.budget-panel,.spec-card,.wishlist-card,.product-card,.panel,.stat-card,.metric-card,.upgrade-card{
+ background:linear-gradient(145deg,rgba(8,12,47,.91),rgba(12,5,42,.88))!important;
+ border:1px solid rgba(100,72,255,.68)!important;border-radius:17px!important;
+ box-shadow:0 0 22px rgba(88,37,255,.12),inset 0 1px 0 rgba(255,255,255,.07)!important;
+ backdrop-filter:blur(12px)
+}
+h1,h2,h3,.section-title{color:#fff!important;text-shadow:0 0 22px rgba(141,75,255,.48)}
+h1{background:linear-gradient(90deg,#ef8bff,#9d78ff 52%,#62eaff);-webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent}
+button,.btn,a.button,input[type=submit]{border:1px solid rgba(139,74,255,.9)!important;border-radius:10px!important;color:white!important;background:linear-gradient(115deg,#762aff,#3b19bd 65%,#124dbd)!important;box-shadow:0 0 15px rgba(107,44,255,.28);transition:transform .18s ease,box-shadow .18s ease}
+button:hover,.btn:hover,a.button:hover,input[type=submit]:hover{transform:translateY(-2px);box-shadow:0 0 23px rgba(110,67,255,.55),0 0 12px rgba(31,211,255,.18)}
+input,select,textarea{background:rgba(4,8,35,.92)!important;color:#fff!important;border:1px solid rgba(93,102,255,.65)!important;border-radius:9px!important}
+a{color:#72eaff}
+progress{accent-color:#8c42ff}
+hr{border-color:rgba(119,67,255,.4)}
+footer{background:rgba(3,5,22,.88)!important;border-top:1px solid rgba(106,66,255,.55)}
+img{max-width:100%}
+@media(max-width:700px){body{background-attachment:scroll!important;background-position:center!important}section,.card,.dash-card,.progress-card,.summary-card,.budget-panel,.spec-card,.wishlist-card,.product-card,.panel,.stat-card,.metric-card,.upgrade-card{border-radius:13px!important}}
+@media(prefers-reduced-motion:reduce){button,.btn,a.button{transition:none}}
+</style>
