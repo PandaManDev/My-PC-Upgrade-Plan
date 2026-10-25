@@ -74,6 +74,13 @@ async function messages(req: Request, url: URL) {
   const session = await verifyOwner(req);
   const isAdmin = !!session && !!ADMIN_EMAIL && session.email.toLowerCase() === ADMIN_EMAIL;
   if (!session) return { error: "Please sign in to your account to use chat.", status: 401 };
+  if (req.method === "POST") {
+    const requestedBody = await req.clone().json().catch(() => ({}));
+    if (requestedBody.action === "reply" && !isAdmin) return { error: "Administrator access required. Check the CHAT_ADMIN_EMAIL Supabase secret and redeploy pup-api.", status: 403 };
+  }
+  if (req.method === "GET" && !url.searchParams.get("conversationId") && !isAdmin) {
+    return { error: "Administrator access required to view all conversations. Check the CHAT_ADMIN_EMAIL Supabase secret and redeploy pup-api.", status: 403 };
+  }
   const clientIp = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim().slice(0, 100) || "Unknown";
   const publicMessage = (m: any) => ({ id: m.id, conversationId: m.conversation_id, sender: m.sender, senderName: m.sender_name, profilePicture: m.profile_picture, text: m.text, createdAt: m.created_at });
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
