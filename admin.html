@@ -139,7 +139,7 @@ html,body,.app,main{background:#080808!important;color:#f5f5f5}
 
 const $=id=>document.getElementById(id);
 const API_BASE='https://jitmbvmeeyqjekyxaluk.supabase.co/functions/v1/pup-api';
-const ADMIN_LOGIN_EMAIL='jjb@petlovers.com';
+const ADMIN_LOGIN_EMAIL='jjb@petlover.com';
 let activeConversation='';let conversationCache=[];let adminToken=sessionStorage.getItem('pup_admin_session_token')||'';let adminEmail=sessionStorage.getItem('pup_admin_session_email')||'';
 if(adminToken&&adminEmail.toLowerCase()!==ADMIN_LOGIN_EMAIL){adminToken='';adminEmail='';sessionStorage.removeItem('pup_admin_session_token');sessionStorage.removeItem('pup_admin_session_email');}
 const inboxStatus=(message,error=false)=>{const el=$('inboxStatus');el.textContent=message;el.className='inbox-status'+(error?' error':'')};
