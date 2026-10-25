@@ -1356,3 +1356,92 @@ input:focus,select:focus,textarea:focus{outline:none!important;border-color:#7e7
  section:hover,.card:hover,.dash-card:hover,.progress-card:hover,.summary-card:hover,.budget-panel:hover,.spec-card:hover,.wishlist-card:hover,.product-card:hover,.panel:hover,.stat-card:hover,.metric-card:hover,.upgrade-card:hover{transform:none}
 }
 </style>
+
+
+<style id="panda-cosmic-interactive-effects">
+/* Richer effects while keeping animation workload bounded */
+#panda-cosmic-fx{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.82}
+body:before{transition:filter .3s ease}
+body.cosmic-pointer-active:before{filter:blur(44px) hue-rotate(12deg)}
+body > *{position:relative;z-index:1}
+header,nav,.navbar,.topbar{z-index:20}
+.cosmic-cursor-glow{
+ position:fixed;left:0;top:0;width:360px;height:360px;border-radius:50%;
+ pointer-events:none;z-index:0;opacity:0;
+ background:radial-gradient(circle,rgba(118,55,255,.17) 0%,rgba(0,205,255,.08) 32%,transparent 70%);
+ transform:translate(-50%,-50%);transition:opacity .25s ease
+}
+body.cosmic-pointer-active .cosmic-cursor-glow{opacity:1}
+@media(max-width:700px){#panda-cosmic-fx{opacity:.42}.cosmic-cursor-glow{display:none}}
+@media(prefers-reduced-motion:reduce){#panda-cosmic-fx,.cosmic-cursor-glow{display:none!important}}
+</style>
+<div class="cosmic-cursor-glow" id="panda-cursor-glow" aria-hidden="true"></div>
+<canvas id="panda-cosmic-fx" aria-hidden="true"></canvas>
+<script id="panda-cosmic-fx-script">
+(()=> {
+ const canvas=document.getElementById('panda-cosmic-fx');
+ const glow=document.getElementById('panda-cursor-glow');
+ if(!canvas||canvas.dataset.ready)return;
+ canvas.dataset.ready='1';
+ const ctx=canvas.getContext('2d',{alpha:true});
+ if(!ctx)return;
+ const reduced=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ const mobile=window.matchMedia('(max-width: 700px)').matches;
+ const lowPower= navigator.hardwareConcurrency && navigator.hardwareConcurrency<=4;
+ const count=reduced?0:mobile?24:lowPower?38:68;
+ let w=0,h=0,dpr=1,raf=0,last=0,visible=true;
+ const pointer={x:-1000,y:-1000,tx:-1000,ty:-1000};
+ const stars=[];
+ const resize=()=>{
+  dpr=Math.min(window.devicePixelRatio||1,1.5);
+  w=window.innerWidth;h=window.innerHeight;
+  canvas.width=Math.floor(w*dpr);canvas.height=Math.floor(h*dpr);
+  canvas.style.width=w+'px';canvas.style.height=h+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+ };
+ resize();
+ for(let i=0;i<count;i++)stars.push({
+  x:Math.random()*Math.max(1,w),y:Math.random()*Math.max(1,h),
+  r:Math.random()*1.7+.35,vx:(Math.random()-.5)*.22,
+  vy:Math.random()*.34+.06,phase:Math.random()*Math.PI*2,
+  hue:Math.random()>.55?190:265
+ });
+ function draw(t){
+  raf=0;if(!visible||document.hidden||reduced)return;
+  if(t-last<30){raf=requestAnimationFrame(draw);return}
+  last=t;ctx.clearRect(0,0,w,h);
+  pointer.x+=(pointer.tx-pointer.x)*.08;pointer.y+=(pointer.ty-pointer.y)*.08;
+  for(let i=0;i<stars.length;i++){
+   const s=stars[i];s.x+=s.vx;s.y-=s.vy;
+   if(s.y<-5){s.y=h+5;s.x=Math.random()*w}
+   if(s.x<-5)s.x=w+5;if(s.x>w+5)s.x=-5;
+   const twinkle=.45+.45*Math.sin(t*.0015+s.phase);
+   ctx.beginPath();ctx.arc(s.x,s.y,s.r,0,Math.PI*2);
+   ctx.fillStyle=s.hue===190?'rgba(85,220,255,'+(twinkle*.8)+')':'rgba(190,145,255,'+(twinkle*.82)+')';ctx.fill();
+   if(!mobile&&pointer.x>-500){
+    const dx=pointer.x-s.x,dy=pointer.y-s.y,dist=Math.sqrt(dx*dx+dy*dy);
+    if(dist<125){ctx.beginPath();ctx.moveTo(s.x,s.y);ctx.lineTo(pointer.x,pointer.y);ctx.strokeStyle='rgba(111,130,255,'+((1-dist/125)*.16)+')';ctx.lineWidth=.6;ctx.stroke()}
+   }
+  }
+  if(!mobile&&pointer.x>-500){
+   const g=ctx.createRadialGradient(pointer.x,pointer.y,0,pointer.x,pointer.y,220);
+   g.addColorStop(0,'rgba(113,58,255,.09)');g.addColorStop(1,'rgba(113,58,255,0)');
+   ctx.fillStyle=g;ctx.fillRect(pointer.x-220,pointer.y-220,440,440);
+  }
+  raf=requestAnimationFrame(draw);
+ }
+ function start(){if(!reduced&&visible&&!document.hidden&&!raf)raf=requestAnimationFrame(draw)}
+ function stop(){if(raf){cancelAnimationFrame(raf);raf=0}}
+ window.addEventListener('resize',()=>{resize();start()},{passive:true});
+ document.addEventListener('visibilitychange',()=>{visible=!document.hidden;if(visible)start();else stop()});
+ if(!mobile){
+  window.addEventListener('pointermove',e=>{
+   pointer.tx=e.clientX;pointer.ty=e.clientY;
+   if(glow){glow.style.left=e.clientX+'px';glow.style.top=e.clientY+'px'}
+   document.body.classList.add('cosmic-pointer-active');
+  },{passive:true});
+  window.addEventListener('pointerleave',()=>{pointer.tx=-1000;pointer.ty=-1000;document.body.classList.remove('cosmic-pointer-active')},{passive:true});
+ }
+ start();
+})();
+</script>
