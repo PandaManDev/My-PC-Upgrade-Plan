@@ -511,3 +511,189 @@ button, input, select, textarea { max-width: 100%; }
   .part { padding: 24px; }
 }
 </style>
+
+
+<style id="wishlist-card-redesign">
+/* Wishlist cards: clearer product hierarchy, calmer spacing, and stronger actions */
+#partsGrid {
+  align-items: stretch;
+  gap: 18px;
+}
+#partsGrid > .part {
+  position: relative;
+  isolation: isolate;
+  overflow: hidden;
+  min-height: 100%;
+  padding: 20px;
+  gap: 0;
+  border: 1px solid #a78bfa38;
+  border-radius: 20px;
+  background:
+    radial-gradient(ellipse at 50% 0%, #a855f71b 0%, transparent 54%),
+    linear-gradient(155deg, #191326 0%, #100d18 58%, #0b0910 100%);
+  box-shadow: 0 8px 24px #0002, inset 0 1px 0 #ffffff08;
+  transition: transform .22s ease, border-color .22s ease, box-shadow .22s ease, background .22s ease;
+}
+#partsGrid > .part::before {
+  content: "";
+  position: absolute;
+  z-index: -1;
+  inset: 0 18% auto;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, #e9d5ff8a, transparent);
+  opacity: .65;
+}
+#partsGrid > .part:hover {
+  transform: translateY(-4px);
+  border-color: #c084fc9c;
+  background:
+    radial-gradient(ellipse at 50% 0%, #a855f72b 0%, transparent 58%),
+    linear-gradient(155deg, #20152f 0%, #120d1d 60%, #0b0910 100%);
+  box-shadow: 0 16px 34px #0005, 0 0 0 1px #c084fc12, 0 0 28px #9333ea14;
+}
+#partsGrid .part-top {
+  align-items: center;
+  min-height: 28px;
+}
+#partsGrid .tag {
+  display: inline-flex;
+  align-items: center;
+  min-height: 25px;
+  padding: 5px 9px;
+  border: 1px solid #c084fc35;
+  border-radius: 999px;
+  background: #a855f712;
+  color: #dec9ff;
+  font-size: 9px;
+  letter-spacing: .13em;
+}
+#partsGrid .part-icon {
+  height: 116px;
+  margin: 14px 0 16px;
+  border: 1px solid #c084fc17;
+  border-radius: 15px;
+  background:
+    radial-gradient(ellipse at 50% 60%, #a855f72a 0%, #a855f70b 42%, transparent 72%),
+    linear-gradient(135deg, #ffffff05, #a78bfa05);
+  font-size: 50px;
+  text-shadow: 0 5px 22px #c084fc33;
+}
+#partsGrid .part h3 {
+  min-height: 3.0em;
+  margin: 0 0 9px;
+  color: #faf5ff;
+  font-size: 17px;
+  line-height: 1.45;
+  letter-spacing: -.025em;
+  text-wrap: pretty;
+}
+#partsGrid .part p {
+  flex: 1 0 auto;
+  margin: 0 0 18px;
+  color: #b9b0c7;
+  font-size: 12px;
+  line-height: 1.75;
+}
+#partsGrid .part-bottom {
+  align-items: flex-end;
+  margin-top: auto;
+  padding: 14px 0 0;
+  border-top: 1px solid #ffffff12;
+  gap: 12px;
+}
+#partsGrid .price-label {
+  font-size: 9px;
+  letter-spacing: .13em;
+  color: #a99bb9;
+}
+#partsGrid .price-value {
+  margin-top: 4px;
+  color: #f0d9ff;
+  font-size: 26px;
+  line-height: 1.2;
+  letter-spacing: -.045em;
+}
+#partsGrid .price-source {
+  margin-top: 5px;
+  font-size: 10px;
+  line-height: 1.5;
+  color: #aaa0b8;
+}
+#partsGrid .price-source a {
+  color: #d8b4fe;
+  text-underline-offset: 3px;
+}
+#partsGrid .price-updated {
+  max-width: 112px;
+  padding-bottom: 3px;
+  font-size: 9px;
+  line-height: 1.5;
+  color: #8f849d;
+}
+#partsGrid .part-links {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 9px;
+  margin-top: 15px;
+}
+#partsGrid .part-links a {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 43px;
+  padding: 10px 9px;
+  border: 1px solid #b69aff35;
+  border-radius: 11px;
+  background: #ffffff05;
+  color: #e9ddff;
+  font-size: 11px;
+  font-weight: 800;
+  line-height: 1.35;
+  text-decoration: none;
+  transition: background .18s ease, border-color .18s ease, transform .18s ease;
+}
+#partsGrid .part-links a:hover {
+  transform: translateY(-1px);
+  border-color: #c084fc8a;
+  background: #a855f71c;
+}
+#partsGrid .part-links a.gift-product {
+  border-color: transparent;
+  background: linear-gradient(115deg, #7c3aed, #a21caf);
+  color: white;
+  box-shadow: 0 5px 15px #7c3aed24;
+}
+#partsGrid .part-links a.gift-product:hover {
+  background: linear-gradient(115deg, #8b5cf6, #c026d3);
+  box-shadow: 0 7px 20px #a855f738;
+}
+#partsGrid .part-links a:focus-visible {
+  outline: 2px solid #f0abfc;
+  outline-offset: 3px;
+}
+@media (min-width: 851px) {
+  #partsGrid { gap: 20px; }
+  #partsGrid > .part { padding: 22px; }
+  #partsGrid .part-icon { height: 126px; }
+  #partsGrid .part h3 { font-size: 18px; }
+}
+@media (max-width: 700px) {
+  #partsGrid { gap: 13px; }
+  #partsGrid > .part { padding: 17px; border-radius: 17px; }
+  #partsGrid .part-icon { height: 88px; margin: 11px 0 13px; font-size: 41px; }
+  #partsGrid .part h3 { min-height: 0; font-size: 16px; }
+  #partsGrid .part p { margin-bottom: 15px; }
+  #partsGrid .price-value { font-size: 24px; }
+  #partsGrid .part-links { gap: 8px; }
+  #partsGrid .part-links a { min-height: 44px; font-size: 11px; }
+}
+@media (max-width: 390px) {
+  #partsGrid .part-bottom { align-items: flex-start; }
+  #partsGrid .price-updated { max-width: 92px; }
+  #partsGrid .part-links { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  #partsGrid > .part, #partsGrid .part-links a { transition: none; }
+  #partsGrid > .part:hover, #partsGrid .part-links a:hover { transform: none; }
+}
+</style>
