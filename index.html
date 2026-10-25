@@ -697,3 +697,84 @@ button, input, select, textarea { max-width: 100%; }
   #partsGrid > .part:hover, #partsGrid .part-links a:hover { transform: none; }
 }
 </style>
+
+
+<style id="galaxy-wishlist-theme">
+/* Galaxy-inspired wishlist cards: deep space, starfields, and nebula glow */
+#partsGrid > .part {
+  border: 1px solid #8b7dff55;
+  background:
+    radial-gradient(circle at 14% 17%, #ffffffb8 0 1px, transparent 1.5px),
+    radial-gradient(circle at 83% 12%, #b8c7ffb8 0 1px, transparent 1.7px),
+    radial-gradient(circle at 68% 34%, #ffffff7d 0 .8px, transparent 1.5px),
+    radial-gradient(circle at 25% 68%, #c4b5fd8c 0 1px, transparent 1.7px),
+    radial-gradient(circle at 91% 77%, #ffffff8c 0 1px, transparent 1.6px),
+    radial-gradient(ellipse at 8% 0%, #7c3aed48 0%, transparent 48%),
+    radial-gradient(ellipse at 100% 75%, #2563eb2b 0%, transparent 50%),
+    linear-gradient(145deg, #11142d 0%, #111025 46%, #090b19 100%);
+  box-shadow: 0 10px 28px #02061770, inset 0 1px 0 #ffffff12, 0 0 0 1px #818cf80a;
+}
+#partsGrid > .part::before {
+  inset: 0 12% auto;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, #a5b4fc, #e9d5ff, #67e8f9, transparent);
+  opacity: .85;
+  filter: drop-shadow(0 0 7px #818cf8);
+}
+#partsGrid > .part:hover {
+  border-color: #a5b4fcbd;
+  background:
+    radial-gradient(circle at 14% 17%, #ffffffd1 0 1px, transparent 1.5px),
+    radial-gradient(circle at 83% 12%, #c7d2fe 0 1px, transparent 1.7px),
+    radial-gradient(circle at 68% 34%, #ffffffa6 0 .8px, transparent 1.5px),
+    radial-gradient(circle at 25% 68%, #ddd6fe 0 1px, transparent 1.7px),
+    radial-gradient(circle at 91% 77%, #ffffffb8 0 1px, transparent 1.6px),
+    radial-gradient(ellipse at 8% 0%, #7c3aed60 0%, transparent 50%),
+    radial-gradient(ellipse at 100% 75%, #2563eb40 0%, transparent 52%),
+    linear-gradient(145deg, #171a3b 0%, #12112d 46%, #090b19 100%);
+  box-shadow: 0 18px 38px #02061799, 0 0 24px #818cf82a, inset 0 1px 0 #ffffff18;
+}
+#partsGrid .tag {
+  border-color: #818cf866;
+  background: linear-gradient(110deg, #7c3aed22, #2563eb20);
+  color: #dbeafe;
+}
+#partsGrid .part-icon {
+  border-color: #818cf83b;
+  background:
+    radial-gradient(ellipse at 35% 25%, #a78bfa30 0%, transparent 42%),
+    radial-gradient(ellipse at 75% 85%, #38bdf81e 0%, transparent 46%),
+    linear-gradient(135deg, #818cf80b, #c4b5fd0a);
+  box-shadow: inset 0 0 28px #818cf80a;
+  text-shadow: 0 0 24px #a5b4fc50;
+}
+#partsGrid .part h3 { color: #f1f5ff; }
+#partsGrid .part p { color: #b9c3df; }
+#partsGrid .part-bottom { border-top-color: #a5b4fc24; }
+#partsGrid .price-label { color: #a5b4fc; }
+#partsGrid .price-value {
+  color: #c7d2fe;
+  text-shadow: 0 0 18px #818cf82a;
+}
+#partsGrid .price-source { color: #aab6d4; }
+#partsGrid .price-source a { color: #93c5fd; }
+#partsGrid .price-updated { color: #8f9cbd; }
+#partsGrid .part-links a {
+  border-color: #818cf847;
+  background: linear-gradient(135deg, #818cf80c, #38bdf808);
+  color: #e0e7ff;
+}
+#partsGrid .part-links a:hover {
+  border-color: #a5b4fcbd;
+  background: linear-gradient(120deg, #7c3aed2b, #2563eb24);
+}
+#partsGrid .part-links a.gift-product {
+  background: linear-gradient(115deg, #6d28d9, #4338ca 55%, #0369a1);
+  box-shadow: 0 5px 18px #4f46e52b;
+}
+#partsGrid .part-links a.gift-product:hover {
+  background: linear-gradient(115deg, #7c3aed, #4f46e5 55%, #0284c7);
+  box-shadow: 0 7px 22px #6366f14a;
+}
+#partsGrid .part-links a:focus-visible { outline-color: #67e8f9; }
+</style>
