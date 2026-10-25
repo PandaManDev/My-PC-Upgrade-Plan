@@ -244,13 +244,20 @@ async function enableBrowserNotifications(){
   try{
     const permission=await Notification.requestPermission();
     syncNotificationButton();
-    if(permission==='granted')inboxStatus('Browser notifications enabled. Keep this admin dashboard open to receive new-message alerts.');
+    if(permission==='granted'){
+      syncNotificationButton();
+      try{
+        const test=new Notification('Panda PC Support',{body:'Notifications are working. New visitor messages will alert here.',tag:'pup-notification-test'});
+        test.onclick=()=>{window.focus();test.close();};
+        inboxStatus('Notifications enabled and test alert sent. Keep this dashboard open for new-message alerts.');
+      }catch(error){inboxStatus('Permission is granted, but this browser could not display the test alert: '+error.message,true);}
+    }
     else if(permission==='denied')inboxStatus('Notifications are blocked by your browser. Allow them in the site settings, then try again.',true);
     else inboxStatus('Notification permission was not granted. You can enable it later.',true);
   }catch(error){inboxStatus('Could not enable browser notifications: '+error.message,true);}
 }
 function notifyNewVisitorMessage(conversation,message){
-  if(!('Notification' in window)||Notification.permission!=='granted'||!message||message.sender==='owner')return;
+  if(!('Notification' in window)||Notification.permission!=='granted'||!message||String(message.sender||'').toLowerCase()==='owner')return;
   const conversationId=conversation?.conversationId||activeConversation;
   const key=notificationMessageKey(conversationId,message);
   if(notifiedMessageKeys.has(key))return;
@@ -259,7 +266,7 @@ function notifyNewVisitorMessage(conversation,message){
   const visitorName=conversation?.visitorName||message.senderName||'Website visitor';
   const body=String(message.text||'New visitor message').slice(0,180);
   try{
-    const notice=new Notification('New message from '+visitorName,{body,tag:'pup-message-'+conversationId,icon:'./favicon.svg'});
+    const notice=new Notification('New message from '+visitorName,{body,tag:'pup-message-'+conversationId,renotify:true});
     notice.onclick=()=>{window.focus();notice.close();if(conversationId)openConversation(conversationId);};
   }catch(error){console.warn('Browser notification could not be shown:',error);}
 }
@@ -269,7 +276,7 @@ function checkConversationNotifications(previous,next){
   const previousById=new Map(previous.map(c=>[c.conversationId,c]));
   for(const conversation of next){
     const latest=lastMessageOf(conversation);
-    if(!latest||latest.sender==='owner')continue;
+    if(!latest||String(latest.sender||'').toLowerCase()==='owner')continue;
     const old=previousById.get(conversation.conversationId);
     const oldLatest=lastMessageOf(old);
     const changed=!old||!oldLatest||notificationMessageKey(conversation.conversationId,latest)!==notificationMessageKey(conversation.conversationId,oldLatest);
@@ -469,12 +476,12 @@ $('adminPassword').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventD
 window.addEventListener('error',e=>{try{loginStatus('Page error: '+(e.message||'An unexpected error occurred.'),true);}catch{}});
 $('conversationSearch').addEventListener('input',renderConversations);$('conversationSort').addEventListener('change',renderConversations);$('autoRefresh').addEventListener('change',()=>{inboxStatus($('autoRefresh').checked?'Auto-refresh enabled. Inbox will refresh every 30 seconds.':'Auto-refresh paused.');});
 $('reloadChats').addEventListener('click',loadConversations);$('signOut').addEventListener('click',signOut);$('downloadSelectedChat').addEventListener('click',downloadSelectedChat);$('downloadCsv').addEventListener('click',downloadConversationCsv);$('downloadAllChats').addEventListener('click',downloadAllChats);showSignedIn();
-let autoRefreshTimer=setInterval(()=>{if(adminToken&&$('autoRefresh').checked&&!document.hidden)loadConversations();},30000);
+let autoRefreshTimer=setInterval(()=>{if(adminToken&&$('autoRefresh').checked)loadConversations();},30000);
 
 // Poll the selected conversation independently so incoming messages appear without
 // refreshing the entire inbox. Preserve any reply currently being drafted.
 async function refreshActiveConversation(){
-  if(!adminToken||!activeConversation||document.hidden||activeChatRefreshBusy)return;
+  if(!adminToken||!activeConversation||activeChatRefreshBusy)return;
   const draft=document.querySelector('#chatMessages .reply-form textarea');
   if(draft&&document.activeElement===draft)return;
   activeChatRefreshBusy=true;
