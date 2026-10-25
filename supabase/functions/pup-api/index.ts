@@ -258,12 +258,8 @@ async function messages(req: Request, url: URL) {
       };
   }
 
-  if (req.method === "GET" && !url.searchParams.get("conversationId") && !isAdmin)
-    return {
-      error: "Administrator access required to view all conversations. Check the CHAT_ADMIN_EMAIL Supabase secret and redeploy pup-api.",
-      status: 403
-    };
-
+  // Non-admin users may list only conversations owned by their account.
+  // The query below scopes non-admin results to session.sub; admins can still view all.
   const clientIp = (
     req.headers.get("cf-connecting-ip") ||
     req.headers.get("x-real-ip") ||
