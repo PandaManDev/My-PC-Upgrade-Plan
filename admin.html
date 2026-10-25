@@ -80,10 +80,38 @@ html,body,.app,main{background:#080808!important;color:#f5f5f5}
  .reply-form{position:sticky;bottom:0;z-index:2}
 }
 
+
+.auth-gate{min-height:100vh;display:grid;place-items:center;padding:24px;background:#080808}
+.auth-gate[hidden],.app[hidden]{display:none!important}
+.auth-card{width:min(100%,480px);padding:28px;border:1px solid #303030;border-radius:20px;background:#111;box-shadow:0 24px 80px #0008}
+.auth-brand{display:flex;align-items:center;gap:12px;margin-bottom:28px}
+.auth-brand .logo{display:grid;place-items:center;width:44px;height:44px;border-radius:13px;background:#242424;font-size:24px}
+.auth-brand strong,.auth-brand small{display:block}
+.auth-brand strong{font-size:15px}
+.auth-brand small{margin-top:4px;color:#aaa;font-size:12px}
+.auth-card h1{margin:0 0 8px;font-size:28px;letter-spacing:-.6px}
+.auth-card>p{margin:0 0 22px;color:#aaa;line-height:1.5}
+.auth-card .login-card{display:block;padding:0;border:0;background:transparent;box-shadow:none}
+.auth-card .inbox-controls{display:grid;grid-template-columns:1fr;gap:12px}
+.auth-card .inbox-controls input,.auth-card .inbox-controls button{width:100%;min-height:44px}
+.auth-card .inbox-status{padding:12px 0 0}
+@media(max-width:520px){.auth-gate{padding:16px}.auth-card{padding:22px;border-radius:16px}}
+
 </style>
 </head>
 <body>
-<div class="app">
+<div id="authGate" class="auth-gate">
+  <div class="auth-card">
+    <div class="auth-brand"><span class="logo">🐼</span><div><strong>Panda PC Support</strong><small>Administrator access</small></div></div>
+    <h1>Admin sign in</h1>
+    <p>Sign in with the authorized administrator account to continue.</p>
+  <div id="adminLogin" class="login-card">
+    <div class="inbox-controls"><input id="adminEmail" type="email" autocomplete="username" placeholder="Account email" aria-label="Website account email"><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Account password" aria-label="Website account password"><button class="btn primary" id="adminSignIn" type="button">Sign in</button></div>
+    <div id="loginStatus" class="inbox-status" role="status">Sign in with your website account to open the inbox.</div>
+  </div>
+  </div>
+</div>
+<div class="app" id="adminApp" hidden>
 <header class="topbar">
   <a class="brand" href="./" aria-label="Panda PC Upgrade Plan home"><span class="logo">🐼</span><span>Panda PC Support<small>Website messages</small></span></a>
   <div class="top-actions"><a class="btn" href="./">← Website</a><button class="btn" id="reloadChats" type="button">Refresh</button></div>
@@ -92,10 +120,6 @@ html,body,.app,main{background:#080808!important;color:#f5f5f5}
   <div class="page-heading"><div><h1>Message inbox</h1><p>Read visitor messages and reply from one place.</p></div><span class="tag"><span class="dot"></span> Support inbox</span></div>
   <section class="inbox-shell" id="chatInbox">
     <div class="inbox-toolbar"><h2>Website conversations</h2><span class="tag" id="conversationCount">0 conversations</span></div>
-    <div id="adminLogin" class="login-card">
-      <div class="inbox-controls"><input id="adminEmail" type="email" autocomplete="username" placeholder="Account email" aria-label="Website account email"><input id="adminPassword" type="password" autocomplete="current-password" placeholder="Account password" aria-label="Website account password"><button class="btn primary" id="adminSignIn" type="button">Sign in</button></div>
-      <div id="loginStatus" class="inbox-status" role="status">Sign in with your website account to open the inbox.</div>
-    </div>
     <div id="adminSession" hidden class="session-row"><span id="signedInAs" class="tag"></span><div class="session-actions"><button class="btn" id="signOut" type="button">Sign out</button></div></div>
     <div id="inboxStatus" class="inbox-status" role="status" style="padding:10px 15px">Administrator sign-in required.</div>
     <div class="inbox-layout">
@@ -123,7 +147,12 @@ async function apiRequest(path,options={}){const response=await fetch(API_BASE+p
 async function adminApi(url){return apiRequest(url,{method:'GET',headers:adminHeaders()});}
 function safeDate(value){try{return new Date(value).toLocaleString()}catch{return value||''}}
 function renderConversations(){const list=$('conversationList');list.replaceChildren();$('conversationCount').textContent=conversationCache.length+' conversation'+(conversationCache.length===1?'':'s');if(!conversationCache.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No conversations found.';list.append(empty);return;}for(const conv of conversationCache){const b=document.createElement('button');b.type='button';b.className='conv-item'+(conv.conversationId===activeConversation?' active':'');const title=document.createElement('strong');title.textContent=conv.visitorName||'Website visitor';const detail=document.createElement('small');detail.textContent=(conv.visitorIpAddress?'IP '+conv.visitorIpAddress+' · ':'')+(conv.lastMessage?.text||'No messages yet').slice(0,90)+' · '+safeDate(conv.updatedAt);b.append(title,detail);b.addEventListener('click',()=>openConversation(conv.conversationId));list.append(b);}}
-function showSignedIn(){$('adminLogin').hidden=!!adminToken;$('adminSession').hidden=!adminToken;$('signedInAs').textContent=adminToken?'Signed in as '+adminEmail:'';}
+function showSignedIn(){
+  $('authGate').hidden=!!adminToken;
+  $('adminApp').hidden=!adminToken;
+  $('adminSession').hidden=!adminToken;
+  $('signedInAs').textContent=adminToken?'Signed in as '+adminEmail:'';
+}
 async function signIn(){const email=$('adminEmail').value.trim().toLowerCase(),password=$('adminPassword').value;if(!email||!password){loginStatus('Enter your website account email and password.',true);return;}if(email!==ADMIN_LOGIN_EMAIL){loginStatus('This inbox is restricted to its authorized administrator account.',true);return;}$('adminSignIn').disabled=true;loginStatus('Signing in…');try{const data=await apiRequest('/account',{method:'POST',body:JSON.stringify({action:'login',email,password})});if(!data.token)throw new Error('The sign-in response did not include a session.');adminToken=data.token;adminEmail=data.user?.email||email;sessionStorage.setItem('pup_admin_session_token',adminToken);sessionStorage.setItem('pup_admin_session_email',adminEmail);$('adminPassword').value='';showSignedIn();loginStatus('Signed in. Checking administrator permission…');await loadConversations();}catch(e){adminToken='';adminEmail='';sessionStorage.removeItem('pup_admin_session_token');sessionStorage.removeItem('pup_admin_session_email');showSignedIn();loginStatus(e.message,true);}finally{$('adminSignIn').disabled=false;}}
 function signOut(){adminToken='';adminEmail='';sessionStorage.removeItem('pup_admin_session_token');sessionStorage.removeItem('pup_admin_session_email');conversationCache=[];activeConversation='';renderConversations();$('chatMessages').replaceChildren();const empty=document.createElement('div');empty.className='empty';empty.textContent='Sign in and select a conversation to read messages.';$('chatMessages').append(empty);showSignedIn();inboxStatus('Signed out.');loginStatus('Sign in to securely open the inbox.');}
 async function loadConversations(){if(!adminToken){inboxStatus('Sign in to your website account first.',true);return;}$('reloadChats').disabled=true;inboxStatus('Loading conversations…');try{const data=await adminApi('/messages');conversationCache=data.conversations||[];renderConversations();$('reloadChats').disabled=false;inboxStatus('Loaded '+conversationCache.length+' conversation(s). Select one to read the full chat.');if(activeConversation&&!conversationCache.some(c=>c.conversationId===activeConversation))activeConversation='';if(!activeConversation&&conversationCache.length)await openConversation(conversationCache[0].conversationId);}catch(e){if(/sign in|administrator|authorized|permission/i.test(e.message)){adminToken='';adminEmail='';sessionStorage.removeItem('pup_admin_session_token');sessionStorage.removeItem('pup_admin_session_email');showSignedIn();}inboxStatus(e.message+' Ensure the admin email is configured in Supabase and pup-api is redeployed.',true);$('conversationList').replaceChildren();const empty=document.createElement('div');empty.className='empty';empty.textContent='Could not load conversations.';$('conversationList').append(empty);}finally{$('reloadChats').disabled=false;}}
