@@ -353,26 +353,58 @@ form.addEventListener('submit',async e=>{e.preventDefault();if(!gate()){lockChat
   }
   async function checkConnection(){
     const controller=new AbortController();
-    const timer=setTimeout(()=>controller.abort(),9000);
+    const timer=setTimeout(()=>controller.abort(),12000);
     try{
-      // Anonymous ipapi.is requests return the visitor IP only. The server-side
-      // endpoint performs the keyed lookup so the API key is never exposed here.
-      const ipResponse=await fetch('https://api.ipapi.is/',{
-        method:'GET',headers:{'Accept':'application/json'},cache:'no-store',signal:controller.signal
-      });
-      if(!ipResponse.ok)return;
-      const ipData=await ipResponse.json();
-      if(!ipData || typeof ipData.ip!=='string' || !ipData.ip)return;
+      // Use a dedicated IP endpoint first, then fall back to ipapi.is if blocked.
+      // The IP reputation key stays on the server and is never exposed in this page.
+      let ip=null;
+      const providers=[
+        async()=> {
+          const response=await fetch('https://api.ipify.org?format=json',{
+            headers:{'Accept':'application/json'},cache:'no-store',signal:controller.signal
+          });
+          if(!response.ok)throw new Error('IP lookup provider returned HTTP '+response.status);
+          const data=await response.json();
+          return data && typeof data.ip==='string' ? data.ip.trim() : '';
+        },
+        async()=> {
+          const response=await fetch('https://api.ipapi.is/',{
+            headers:{'Accept':'application/json'},cache:'no-store',signal:controller.signal
+          });
+          if(!response.ok)throw new Error('Fallback IP lookup returned HTTP '+response.status);
+          const data=await response.json();
+          return data && typeof data.ip==='string' ? data.ip.trim() : '';
+        }
+      ];
+      for(const provider of providers){
+        try{
+          const candidate=await provider();
+          if(candidate && candidate.length<=45 && /^[0-9a-fA-F:.]+$/.test(candidate) &&
+             (candidate.includes('.') || candidate.includes(':'))){ip=candidate;break;}
+        }catch(providerError){
+          if(controller.signal.aborted)throw providerError;
+          console.warn('An IP lookup provider failed; trying the backup provider.');
+        }
+      }
+      if(!ip)throw new Error('Both public IP lookup providers failed.');
       const checkResponse=await fetch('https://jitmbvmeeyqjekyxaluk.supabase.co/functions/v1/pup-api/security-check',{
         method:'POST',headers:{'Content-Type':'application/json'},cache:'no-store',signal:controller.signal,
-        body:JSON.stringify({ip:ipData.ip})
+        body:JSON.stringify({ip})
       });
-      if(!checkResponse.ok)return;
-      const result=await checkResponse.json();
-      if(result && (result.is_proxy===true || result.is_vpn===true || result.is_tor===true))deny();
+      const result=await checkResponse.json().catch(()=>null);
+      if(!checkResponse.ok){
+        throw new Error('Security check returned HTTP '+checkResponse.status+
+          (result && result.error ? ': '+result.error : ''));
+      }
+      if(!result || typeof result.is_proxy!=='boolean' ||
+         typeof result.is_vpn!=='boolean' || typeof result.is_tor!=='boolean'){
+        throw new Error('Security check response was incomplete.');
+      }
+      if(result.is_proxy===true || result.is_vpn===true || result.is_tor===true)deny();
     }catch(error){
-      // Fail open if the detection service is blocked, offline, or not configured.
-      console.warn('Proxy/VPN check unavailable; allowing the page to load.');
+      // Keep the page usable if detection infrastructure is unavailable, but log
+      // the actual failure so configuration/network issues can be diagnosed.
+      console.warn('Proxy/VPN check unavailable; allowing the page to load.',error);
     }finally{
       clearTimeout(timer);
     }
