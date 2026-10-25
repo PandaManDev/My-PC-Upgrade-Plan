@@ -79,7 +79,7 @@ async function messages(req: Request, url: URL) {
   if (!session) return { error: "Please sign in to your account to use chat.", status: 401 };
   if (req.method === "POST") {
     const requestedBody = await req.clone().json().catch(() => ({}));
-    if (requestedBody.action === "reply" && !isAdmin) return { error: "Administrator access required. Check the CHAT_ADMIN_EMAIL Supabase secret and redeploy pup-api.", status: 403 };
+    if (["reply", "delete-conversation"].includes(requestedBody.action) && !isAdmin) return { error: "Administrator access required. Check the CHAT_ADMIN_EMAIL Supabase secret and redeploy pup-api.", status: 403 };
   }
   if (req.method === "GET" && !url.searchParams.get("conversationId") && !isAdmin) {
     return { error: "Administrator access required to view all conversations. Check the CHAT_ADMIN_EMAIL Supabase secret and redeploy pup-api.", status: 403 };
@@ -88,7 +88,21 @@ async function messages(req: Request, url: URL) {
   const publicMessage = (m: any, includeIp = isAdmin) => ({ id: m.id, conversationId: m.conversation_id, sender: m.sender, senderName: m.sender_name, profilePicture: m.profile_picture, text: m.text, createdAt: m.created_at, ...(includeIp && m.ip_address ? { ipAddress: String(m.ip_address).slice(0, 100) } : {}) });
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
   if (req.method === "POST" && isAdmin) {
-    if (body.action !== "reply") return { error: "Admin accounts can only send replies from the admin inbox.", status: 405 };
+    if (body.action === "delete-conversation") {
+      const conversationId = String(body.conversationId || "");
+      if (!validId(conversationId)) return { error: "Invalid conversation ID.", status: 400 };
+      const { data: existing, error: findError } = await db.from("chat_conversations").select("id").eq("id", conversationId).maybeSingle();
+      if (findError) throw findError;
+      const { data: existingMessage, error: messageFindError } = await db.from("chat_messages").select("id").eq("conversation_id", conversationId).limit(1).maybeSingle();
+      if (messageFindError) throw messageFindError;
+      if (!existing && !existingMessage) return { error: "Conversation not found.", status: 404 };
+      const { error: deleteMessagesError } = await db.from("chat_messages").delete().eq("conversation_id", conversationId);
+      if (deleteMessagesError) throw deleteMessagesError;
+      const { error: deleteConversationError } = await db.from("chat_conversations").delete().eq("id", conversationId);
+      if (deleteConversationError) throw deleteConversationError;
+      return { success: true, conversationId, status: 200 };
+    }
+    if (body.action !== "reply") return { error: "Administrator accounts can only reply to or delete conversations.", status: 405 };
     const text = typeof body.text === "string" ? body.text.trim().slice(0, 1500) : "";
     const conversationId = String(body.conversationId || "");
     if (!text) return { error: "Write a reply first.", status: 400 };
