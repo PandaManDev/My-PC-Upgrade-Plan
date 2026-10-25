@@ -241,7 +241,7 @@ body.proxy-access-blocked{overflow:hidden}
     <article class="dash-card"><div class="dash-label">Wishlist total</div><div class="dash-number" id="dashTotal">$0.00</div><div class="dash-caption">Based on listed prices</div></article>
   </div>
   <div class="dash-costs"><div class="dash-cost"><strong id="dashSpent">$0.00</strong><span>Listed cost of purchased parts</span></div><div class="dash-cost"><strong id="dashLeft">$0.00</strong><span>Listed cost of remaining parts</span></div></div>
-  <p class="dashboard-note">Wishlist totals use the listed prices shown on each part card. Prices can change at any time.</p>
+  <p class="dashboard-note">Dashboard totals recalculate automatically from every item and its listed price below, including purchased and remaining costs. Retail prices are not live-synced and can change; verify the retailer listing before buying.</p>
 </section>
 
 
@@ -272,7 +272,7 @@ const $=id=>document.getElementById(id);const money=n=>new Intl.NumberFormat('en
 function save(){try{localStorage.setItem(storageKey,JSON.stringify(state))}catch(e){}if(window.pandaAccountSync)window.pandaAccountSync()}
 function price(p){return Number(p.price)||0}
 function purchased(p){return !!state[p.id]?.purchased}
-function render(){const shown=parts;$('partsGrid').innerHTML=shown.map(p=>'<article class="part"><div class="part-top"><span class="tag">'+p.category+'</span></div><div class="part-icon" aria-hidden="true">'+p.icon+'</div><h3>'+p.name+'</h3><p>'+p.desc+'</p><div class="part-bottom"><div><span class="price-label">CURRENT LISTED PRICE</span><strong class="price-value">'+money(p.price)+'</strong><div class="price-source">Listed at <a href="'+p.priceUrl+'" target="_blank" rel="noopener noreferrer">'+p.priceSource+' ↗</a></div></div><span class="price-updated">Price checked Oct 24, 2026</span></div>'+'<div class="part-links gift-part-links"><a class="preview-product" href="'+p.url+'" target="_blank" rel="noopener noreferrer">Preview Product ↗</a><a class="gift-product" href="./gift.html?product='+encodeURIComponent(p.id)+'">Gift This Part →</a></div></article>').join('');updateTotals()}
+function render(){const shown=parts;$('partsGrid').innerHTML=shown.map(p=>'<article class="part"><div class="part-top"><span class="tag">'+p.category+'</span></div><div class="part-icon" aria-hidden="true">'+p.icon+'</div><h3>'+p.name+'</h3><p>'+p.desc+'</p><div class="part-bottom"><div><span class="price-label">CURRENT LISTED PRICE</span><strong class="price-value">'+money(p.price)+'</strong><div class="price-source">Listed at <a href="'+p.priceUrl+'" target="_blank" rel="noopener noreferrer">'+p.priceSource+' ↗</a></div></div><span class="price-updated">Last manually checked Oct 24, 2026</span></div>'+'<div class="part-links gift-part-links"><a class="preview-product" href="'+p.url+'" target="_blank" rel="noopener noreferrer">Preview Product ↗</a><a class="gift-product" href="./gift.html?product='+encodeURIComponent(p.id)+'">Gift This Part →</a></div></article>').join('');updateTotals()}
 function updateTotals(){
  const total=parts.length,done=parts.filter(p=>purchased(p)).length,remaining=total-done,pct=total?Math.round(done/total*100):0;
  const sum=items=>items.reduce((acc,p)=>acc+price(p),0),all=sum(parts),spent=sum(parts.filter(p=>purchased(p))),left=sum(parts.filter(p=>!purchased(p)));
@@ -386,3 +386,52 @@ form.addEventListener('submit',async e=>{e.preventDefault();if(!gate()){lockChat
 </script>
 </body>
 </html>
+
+<style id="mobile-layout-dashboard-fix">
+/* Whole-page mobile layout refinements */
+html { scroll-padding-top: 112px; }
+body { overflow-wrap: anywhere; }
+img, video, iframe, canvas, svg { max-width: 100%; }
+button, input, select, textarea { max-width: 100%; }
+@media (max-width: 700px) {
+  .wrap { width: min(100% - 24px, 560px); }
+  main { min-width: 0; }
+  .site-header { width: 100%; }
+  .hero { padding: 28px 0 22px; }
+  .hero h1 { font-size: clamp(34px, 9.5vw, 48px); }
+  .hero p { max-width: 42ch; }
+  .dashboard { padding: 14px; margin-bottom: 24px; }
+  .dashboard-head { gap: 10px; }
+  .live-pill { white-space: normal; }
+  .dashboard-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .dashboard-grid .dash-card:first-child { grid-column: 1 / -1; }
+  .dash-number { font-size: clamp(22px, 7vw, 30px); }
+  .dash-costs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .spec-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .summary { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+  .metric { min-width: 0; overflow-wrap: anywhere; }
+  .parts { grid-template-columns: minmax(0, 1fr) !important; }
+  .part { min-width: 0; }
+  .part h3 { overflow-wrap: anywhere; }
+  .part-links { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .part-links a { min-width: 0; padding: 10px 8px; overflow-wrap: anywhere; }
+  .budget { min-width: 0; }
+  .budget-controls { width: 100%; }
+  .budget-input { width: min(100%, 180px); }
+  .footer { align-items: flex-start; }
+  .site-chat-panel { max-width: calc(100vw - 20px); }
+}
+@media (max-width: 390px) {
+  .wrap { width: calc(100% - 20px); }
+  .site-header { padding-inline: 10px; }
+  .site-header .brand-label { max-width: 105px; }
+  .site-header .header-actions .button { padding-inline: 7px; }
+  .dashboard-grid { grid-template-columns: minmax(0, 1fr); }
+  .dashboard-grid .dash-card:first-child { grid-column: auto; }
+  .summary { grid-template-columns: minmax(0, 1fr); }
+  .metric { padding: 12px 14px; }
+  .part-links { grid-template-columns: minmax(0, 1fr); }
+  .dash-costs { grid-template-columns: minmax(0, 1fr); }
+  .section-head { gap: 10px; }
+}
+</style>
