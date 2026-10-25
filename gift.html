@@ -3,30 +3,81 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="theme-color" content="#100b1c">
+<meta name="theme-color" content="#10091b">
 <meta name="robots" content="noindex,nofollow">
-<title>Gift a PC Upgrade · Pandas PC Upgrade Plan</title>
+<title>Gift Checkout · Panda PC Upgrade Plan</title>
+<link rel="icon" href="./favicon.svg" type="image/svg+xml">
 <style>
-:root{color-scheme:dark;--bg:#08060d;--panel:#15101f;--line:#382747;--purple:#c084fc;--muted:#b7a9c8;--text:#fbf7ff;--blue:#0b84ff}
-*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0,#55208b55,transparent 55%),var(--bg);color:var(--text);font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;display:grid;place-items:center;padding:22px}.card{width:min(540px,100%);padding:clamp(22px,5vw,38px);border:1px solid #a855f755;border-radius:24px;background:linear-gradient(145deg,#1a1227,#100b18);box-shadow:0 22px 80px #0007}.brand{color:#d8b4fe;font-size:11px;font-weight:900;letter-spacing:.17em;text-transform:uppercase}.icon{font-size:38px;margin:14px 0 3px}h1{font-size:clamp(27px,6vw,38px);line-height:1.12;letter-spacing:-.045em;margin:5px 0 12px}p{color:var(--muted);margin:8px 0 17px}.product{padding:14px;border:1px solid #a78bfa35;background:#ffffff06;border-radius:14px;margin:20px 0}.product strong{display:block;font-size:16px}.product small{color:var(--muted)}label{display:block;font-size:12px;font-weight:800;margin:20px 0 7px}input{width:100%;padding:13px 14px;border:1px solid #65417f;border-radius:11px;background:#090610;color:#fff;font:inherit;outline:none}input:focus{border-color:#c084fc;box-shadow:0 0 0 3px #a855f722}.btn{width:100%;min-height:46px;display:flex;align-items:center;justify-content:center;padding:11px 14px;border:1px solid #a855f766;border-radius:11px;background:#ffffff08;color:#fff;text-decoration:none;font:inherit;font-weight:800;cursor:pointer}.primary{background:linear-gradient(110deg,#6d28d9,#a21caf);border-color:transparent}.btn:disabled{opacity:.6;cursor:wait}.actions{display:grid;gap:9px;margin-top:14px}.message{min-height:22px;font-size:12px;color:#f0abfc;margin-top:12px}.address{display:none;margin-top:18px;padding:16px;border:1px solid #86efac55;border-radius:13px;background:#86efac0c;white-space:pre-wrap;overflow-wrap:anywhere}.address.visible{display:block}.address strong{display:block;color:#bbf7d0;margin-bottom:7px}.warning{font-size:11px;color:#9f8db5;margin-top:16px}.back{display:inline-block;color:#d8b4fe;text-decoration:none;font-size:12px;margin-top:20px}.hidden{display:none!important}
+:root{color-scheme:dark;--bg:#08060e;--panel:#151020;--line:#3b2852;--purple:#c084fc;--muted:#b8acc8;--text:#fbf8ff;--pink:#e879f9;--green:#86efac}
+*{box-sizing:border-box}
+body{margin:0;min-height:100vh;padding:24px;display:grid;place-items:center;background:radial-gradient(ellipse at 50% -10%,#7629b855,transparent 52%),radial-gradient(circle at 100% 100%,#4c1d9530,transparent 36%),var(--bg);color:var(--text);font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif}
+button,input,a{font:inherit}
+.shell{width:min(620px,100%)}
+.topline{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 14px;color:#c4b5d6;font-size:11px;font-weight:850;letter-spacing:.14em;text-transform:uppercase}
+.live-dot{display:inline-flex;align-items:center;gap:7px;color:#d8b4fe;letter-spacing:.08em}.live-dot:before{content:"";width:7px;height:7px;border-radius:50%;background:#c084fc;box-shadow:0 0 13px #c084fc}
+.card{position:relative;overflow:hidden;padding:clamp(24px,6vw,44px);border:1px solid #a855f74a;border-radius:26px;background:linear-gradient(145deg,#1b1428f5,#100b19f7);box-shadow:0 28px 90px #0008,0 0 42px #7e22ce12}
+.card:before{content:"";position:absolute;top:0;left:12%;right:12%;height:1px;background:linear-gradient(90deg,transparent,#e9d5ff,transparent);opacity:.7}
+.icon-wrap{display:grid;place-items:center;width:58px;height:58px;border:1px solid #c084fc55;border-radius:18px;background:linear-gradient(145deg,#7e22ce35,#c084fc0a);box-shadow:inset 0 0 24px #a855f716,0 0 28px #a855f714;font-size:27px}
+.eyebrow{margin:22px 0 7px;color:#d8b4fe;font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
+h1{max-width:480px;margin:0;font-size:clamp(30px,6vw,44px);line-height:1.06;letter-spacing:-.055em}
+.intro{max-width:490px;margin:14px 0 0;color:var(--muted);font-size:14px}
+.product{display:flex;gap:14px;align-items:flex-start;margin:25px 0;padding:18px;border:1px solid #a78bfa38;border-radius:17px;background:linear-gradient(120deg,#ffffff08,#ffffff03)}
+.product-mark{flex:0 0 42px;display:grid;place-items:center;width:42px;height:42px;border-radius:13px;background:#a855f71c;font-size:20px}
+.product strong{display:block;font-size:15px;line-height:1.45;overflow-wrap:anywhere}
+.product small{display:block;margin-top:5px;color:var(--muted);font-size:12px}
+.label-row{display:flex;justify-content:space-between;gap:12px;align-items:center;margin:21px 0 8px}
+label{font-size:12px;font-weight:850;letter-spacing:.02em}
+.private-note{color:#a99ab9;font-size:11px}
+.input-wrap{position:relative}
+input{width:100%;min-height:50px;padding:13px 15px;border:1px solid #65447d;border-radius:12px;background:#090610;color:#fff;outline:none;transition:border-color .15s,box-shadow .15s}
+input::placeholder{color:#746480}
+input:focus{border-color:var(--purple);box-shadow:0 0 0 3px #a855f722}
+.btn{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;min-height:48px;padding:12px 15px;border:1px solid #a855f766;border-radius:12px;background:#ffffff08;color:#fff;text-decoration:none;text-align:center;font-weight:850;cursor:pointer;transition:transform .15s,border-color .15s,filter .15s}
+.btn:hover:not(:disabled){transform:translateY(-1px);border-color:#d8b4fe}
+.primary{margin-top:12px;background:linear-gradient(110deg,#6d28d9,#a21caf);border-color:transparent;box-shadow:0 8px 24px #7e22ce2b}
+.btn:disabled{opacity:.65;cursor:wait}
+.message{min-height:22px;margin:12px 0 0;color:#f0abfc;font-size:12px;overflow-wrap:anywhere}
+.message.error{color:#fda4af}.message.success{color:var(--green)}
+.address{display:none;margin-top:20px;padding:18px;border:1px solid #86efac50;border-radius:16px;background:#86efac0b}
+.address.visible{display:block}
+.address strong{display:block;margin-bottom:8px;color:#bbf7d0;font-size:13px}
+.address-text{white-space:pre-wrap;overflow-wrap:anywhere;color:#f0fdf4}
+.actions{display:grid;gap:9px;margin-top:16px}
+.safe-note{display:flex;gap:10px;margin:24px 0 0;padding-top:18px;border-top:1px solid #ffffff12;color:#9f91b1;font-size:11px;line-height:1.55}
+.safe-note span{color:#d8b4fe}
+.back{display:inline-flex;margin-top:18px;color:#d8b4fe;text-decoration:none;font-size:12px;font-weight:750}
+.back:hover{text-decoration:underline}
+.hidden{display:none!important}
+@media(max-width:460px){body{padding:14px}.topline{font-size:9px}.card{border-radius:21px}.product{padding:14px}.private-note{max-width:130px;text-align:right}}
+@media(prefers-reduced-motion:reduce){*,*:before,*:after{transition:none!important;scroll-behavior:auto!important}}
 </style>
 </head>
 <body>
-<main class="card">
-<div class="brand">Pandas PC Upgrade Plan · Gift Checkout</div>
-<div class="icon" aria-hidden="true">🎁</div>
-<h1>Help upgrade the setup.</h1>
-<p>Previewing a product never reveals the shipping address. Enter the private authorization key you received to reveal the gift shipping details, then continue to the retailer.</p>
-<section class="product" aria-live="polite"><strong id="productName">Loading selected product…</strong><small id="productNote">The address stays hidden until the key is accepted.</small></section>
-<form id="giftForm">
-<label for="giftKey">Gift authorization key</label>
-<input id="giftKey" name="key" type="password" autocomplete="off" maxlength="256" required placeholder="Enter the key you were given">
-<div class="actions"><button class="btn primary" id="revealBtn" type="submit">Verify Key & Reveal Address</button></div>
-<p class="message" id="message" role="status" aria-live="polite"></p>
-</form>
-<section class="address" id="addressBox" aria-live="polite"><strong>Authorized shipping address</strong><div id="addressText"></div><div class="actions"><a class="btn primary" id="continueBuy" href="#" target="_blank" rel="noopener noreferrer">Continue to Buy This Product ↗</a><a class="btn" id="previewAgain" href="#" target="_blank" rel="noopener noreferrer">Preview Product Again ↗</a></div></section>
-<p class="warning">Keep the address private. Only share it with someone you trust to purchase and ship your gift.</p>
-<a class="back" href="./index.html">← Back to the wishlist</a>
+<main class="shell">
+  <div class="topline"><span>Panda PC Upgrade Plan</span><span class="live-dot">Private gift checkout</span></div>
+  <section class="card">
+    <div class="icon-wrap" aria-hidden="true">🎁</div>
+    <p class="eyebrow">A little help goes a long way</p>
+    <h1>Help upgrade the setup.</h1>
+    <p class="intro">Choose a part from the wishlist, verify your private gift key, then continue to the exact retailer listing. The shipping address stays hidden unless the key is accepted.</p>
+    <section class="product" aria-live="polite" aria-atomic="true">
+      <div class="product-mark" aria-hidden="true">▦</div>
+      <div><strong id="productName">Checking selected product…</strong><small id="productNote">Loading the item from your wishlist link.</small></div>
+    </section>
+    <form id="giftForm" novalidate>
+      <div class="label-row"><label for="giftKey">Gift authorization key</label><span class="private-note">Shared privately by the owner</span></div>
+      <div class="input-wrap"><input id="giftKey" name="key" type="password" autocomplete="off" autocapitalize="none" spellcheck="false" maxlength="256" required placeholder="Enter your authorization key" aria-describedby="message"></div>
+      <button class="btn primary" id="revealBtn" type="submit">Verify key <span aria-hidden="true">→</span></button>
+      <p class="message" id="message" role="status" aria-live="polite"></p>
+    </form>
+    <section class="address" id="addressBox" aria-live="polite">
+      <strong>✓ Authorization accepted · Shipping address</strong>
+      <div class="address-text" id="addressText"></div>
+      <div class="actions"><a class="btn primary" id="continueBuy" href="#" target="_blank" rel="noopener noreferrer">Continue to buy this part ↗</a><a class="btn" id="previewAgain" href="#" target="_blank" rel="noopener noreferrer">Open product listing again ↗</a></div>
+    </section>
+    <p class="safe-note"><span aria-hidden="true">◆</span><span><strong>Keep it private.</strong> Only share the address with someone you trust to purchase and ship the gift. The authorization key is a shared secret, not identity verification.</span></p>
+  </section>
+  <a class="back" href="./index.html">← Back to the wishlist</a>
 </main>
 <script>
 (function(){
@@ -40,22 +91,44 @@ const products={
  adapter:{name:'BENFEI 4K DisplayPort-to-HDMI Adapter Cable',url:'https://www.amazon.com/DisplayPort-Adapter-Converter-Gold-Plated-Compatible/dp/B07JFTK8YV/ref=sr_1_7_sspa?s=electronics&sr=1-7-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9tdGY'},
  'usb-hub':{name:'Likorlove 10-Port Powered USB 3.0 Hub with RGB Lighting',url:'https://www.walmart.com/ip/19265860869'}
 };
-const product=products[new URLSearchParams(location.search).get('product')];
+const params=new URLSearchParams(location.search);
+const rawId=(params.get('product')||params.get('productId')||params.get('part')||'').trim().toLowerCase();
+const aliases={'usb_hub':'usb-hub','usbhub':'usb-hub','memory':'ram','ram-kit':'ram','storage':'ssd','external-drive':'backup','hard-drive':'backup','display-adapter':'adapter','dp-hdmi-adapter':'adapter','gaming-keyboard':'keyboard'};
+const productId=aliases[rawId]||rawId;
+const product=products[productId];
 const form=document.getElementById('giftForm'),key=document.getElementById('giftKey'),button=document.getElementById('revealBtn'),message=document.getElementById('message'),box=document.getElementById('addressBox');
-if(!product){document.getElementById('productName').textContent='Product not found';document.getElementById('productNote').textContent='Return to the wishlist and choose a product again.';form.classList.add('hidden');}
-else{document.getElementById('productName').textContent=product.name;document.getElementById('previewAgain').href=product.url;document.getElementById('continueBuy').href=product.url;}
+function say(text,type){message.textContent=text;message.classList.toggle('error',type==='error');message.classList.toggle('success',type==='success')}
+if(!product){
+ document.getElementById('productName').textContent='We couldn’t identify that part';
+ document.getElementById('productNote').textContent='The link may be old or incomplete. Go back to the wishlist and select “Gift This Part” again.';
+ form.classList.add('hidden');
+ say('No matching product ID was found in this link.','error');
+}else{
+ document.getElementById('productName').textContent=product.name;
+ document.getElementById('productNote').textContent='Selected from the wishlist · Address remains private';
+ document.getElementById('previewAgain').href=product.url;
+ document.getElementById('continueBuy').href=product.url;
+}
 form.addEventListener('submit',async function(event){
- event.preventDefault();if(!product)return;
- button.disabled=true;button.textContent='Verifying…';message.textContent='Checking your authorization key…';box.classList.remove('visible');
+ event.preventDefault();
+ if(!product)return;
+ const suppliedKey=key.value.trim();
+ if(!suppliedKey){say('Enter the gift authorization key you were given.','error');key.focus();return;}
+ button.disabled=true;button.textContent='Verifying key…';say('Checking your authorization key…');box.classList.remove('visible');
+ const controller=new AbortController();const timeout=setTimeout(()=>controller.abort(),12000);
  try{
-  const response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},cache:'no-store',body:JSON.stringify({key:key.value})});
+  const response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},cache:'no-store',signal:controller.signal,body:JSON.stringify({key:suppliedKey})});
   const data=await response.json().catch(()=>({}));
   if(!response.ok)throw new Error(data.error||'Could not verify the key. Please try again.');
   if(typeof data.address!=='string'||!data.address.trim())throw new Error('The address is not configured yet. Please contact the wishlist owner.');
   document.getElementById('addressText').textContent=data.address;
-  box.classList.add('visible');message.textContent='Key accepted. You can now continue to the retailer.';key.value='';form.classList.add('hidden');
- }catch(error){message.textContent=error.message||'Unable to verify right now. Please try again.'}
- finally{button.disabled=false;button.textContent='Verify Key & Reveal Address'}
+  box.classList.add('visible');say('Key accepted. You can continue to the retailer.','success');key.value='';form.classList.add('hidden');
+ }catch(error){
+  if(error&&error.name==='AbortError')say('The request took too long. Check your connection and try again.','error');
+  else say((error&&error.message)||'Unable to verify right now. Please try again.','error');
+ }finally{
+  clearTimeout(timeout);button.disabled=false;button.innerHTML='Verify key <span aria-hidden="true">→</span>';
+ }
 });
 })();
 </script>
