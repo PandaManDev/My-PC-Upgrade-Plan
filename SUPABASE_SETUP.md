@@ -18,6 +18,7 @@ In Supabase Dashboard → Project Settings / Edge Functions secrets, set:
 - `SUPABASE_SECRET_KEY` = your server-side Supabase secret key (preferred), or `SUPABASE_SERVICE_ROLE_KEY` = the legacy service-role key
 - `CHAT_AUTH_SECRET` = the existing secret used to sign the current account tokens. **Use the same value as the current backend or existing saved sessions will need to sign in again.** Never put this value in website JavaScript or commit it to GitHub.
 - `CHAT_ADMIN_SECRET` = the existing voice-call admin secret if owner/admin calling is enabled.
+- `CHAT_ADMIN_EMAIL` = `JJB@petlovers.com` (the account email allowed to read the website chat inbox). This is checked server-side; do not add it to frontend JavaScript.
 
 Never use a publishable/anon key as the server key. Never commit any secret values.
 
