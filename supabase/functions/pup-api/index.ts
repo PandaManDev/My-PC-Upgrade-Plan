@@ -73,11 +73,29 @@ async function verifyOwner(req: Request) { return await verify((req.headers.get(
 async function messages(req: Request, url: URL) {
   const session = await verifyOwner(req);
   const isAdmin = !!session && !!ADMIN_EMAIL && session.email.toLowerCase() === ADMIN_EMAIL;
-  if (isAdmin && req.method !== "GET") return { error: "Admin access is read-only for messages.", status: 405 };
   if (!session) return { error: "Please sign in to your account to use chat.", status: 401 };
   const clientIp = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim().slice(0, 100) || "Unknown";
   const publicMessage = (m: any) => ({ id: m.id, conversationId: m.conversation_id, sender: m.sender, senderName: m.sender_name, profilePicture: m.profile_picture, text: m.text, createdAt: m.created_at });
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
+  if (req.method === "POST" && isAdmin) {
+    if (body.action !== "reply") return { error: "Admin accounts can only send replies from the admin inbox.", status: 405 };
+    const text = typeof body.text === "string" ? body.text.trim().slice(0, 1500) : "";
+    const conversationId = String(body.conversationId || "");
+    if (!text) return { error: "Write a reply first.", status: 400 };
+    if (!validId(conversationId)) return { error: "Invalid conversation ID.", status: 400 };
+    const { data: conversation, error: conversationError } = await db.from("chat_conversations").select("id,owner_id").eq("id", conversationId).maybeSingle();
+    if (conversationError) throw conversationError;
+    if (!conversation) return { error: "Conversation not found.", status: 404 };
+    const now = new Date().toISOString();
+    const { error: insertError } = await db.from("chat_messages").insert({ id: crypto.randomUUID(), conversation_id: conversationId, owner_id: conversation.owner_id, sender: "owner", sender_name: "Panda PC Support", profile_picture: "", text, ip_address: null, created_at: now });
+    if (insertError) throw insertError;
+    const { error: updateError } = await db.from("chat_conversations").update({ updated_at: now }).eq("id", conversationId);
+    if (updateError) throw updateError;
+    const { data: rows, error } = await db.from("chat_messages").select("*").eq("conversation_id", conversationId).order("created_at", { ascending: true }).limit(500);
+    if (error) throw error;
+    return { conversationId, messages: (rows || []).map(publicMessage), status: 201 };
+  }
+  if (req.method === "POST" && isAdmin) return { error: "Admin access is read-only for this action.", status: 405 };
   if (req.method === "POST") {
     const text = typeof body.text === "string" ? body.text.trim().slice(0, 1500) : "";
     if (!text) return { error: "Write a message first.", status: 400 };
