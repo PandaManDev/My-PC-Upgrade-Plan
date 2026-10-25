@@ -91,9 +91,21 @@ async function messages(req: Request, url: URL) {
     const conversationId = String(body.conversationId || "");
     if (!text) return { error: "Write a reply first.", status: 400 };
     if (!validId(conversationId)) return { error: "Invalid conversation ID.", status: 400 };
-    const { data: conversation, error: conversationError } = await db.from("chat_conversations").select("id,owner_id").eq("id", conversationId).maybeSingle();
+    const { data: existingConversation, error: conversationError } = await db.from("chat_conversations").select("id,owner_id").eq("id", conversationId).maybeSingle();
     if (conversationError) throw conversationError;
-    if (!conversation) return { error: "Conversation not found.", status: 404 };
+    let conversation: any = existingConversation;
+    // Recreate only the missing conversation index row when messages prove the
+    // conversation exists. This keeps the existing message history intact.
+    if (!conversation) {
+      const { data: firstMessage, error: messageError } = await db.from("chat_messages").select("owner_id").eq("conversation_id", conversationId).limit(1).maybeSingle();
+      if (messageError) throw messageError;
+      if (!firstMessage) return { error: "Conversation not found.", status: 404 };
+      const { data: restored, error: restoreError } = await db.from("chat_conversations").upsert({
+        id: conversationId, owner_id: firstMessage.owner_id || null, updated_at: new Date().toISOString()
+      }).select("id,owner_id").single();
+      if (restoreError) throw restoreError;
+      conversation = restored;
+    }
     const now = new Date().toISOString();
     const { error: insertError } = await db.from("chat_messages").insert({ id: crypto.randomUUID(), conversation_id: conversationId, owner_id: conversation.owner_id, sender: "owner", sender_name: "Panda PC Support", profile_picture: "", text, ip_address: null, created_at: now });
     if (insertError) throw insertError;
@@ -129,11 +141,49 @@ async function messages(req: Request, url: URL) {
     let query = db.from("chat_conversations").select("*").order("updated_at", { ascending: false }).limit(200);
     if (!isAdmin) query = query.eq("owner_id", session!.sub);
     const { data: convs, error } = await query; if (error) throw error;
-    const conversations = await Promise.all((convs || []).map(async c => { const { data: ms } = await db.from("chat_messages").select("*").eq("conversation_id", c.id).order("created_at", { ascending: true }).limit(500); const list = ms || [], last = list[list.length - 1], firstVisitor = list.find((m: any) => m.sender === "visitor"); return { conversationId: c.id, updatedAt: c.updated_at || last?.created_at || "", visitorName: firstVisitor?.sender_name || "Website visitor", visitorIpAddress: firstVisitor?.ip_address || null, lastMessage: last ? publicMessage(last) : null, messagesCount: list.length }; }));
+    const conversationRows = convs || [];
+    // Recovery path for older chats whose messages exist but whose conversation
+    // index row is missing. Never delete or rewrite existing messages.
+    if (isAdmin) {
+      const { data: allMessages, error: messageError } = await db.from("chat_messages")
+        .select("conversation_id,owner_id,sender,sender_name,ip_address,text,created_at")
+        .order("created_at", { ascending: false }).limit(5000);
+      if (messageError) throw messageError;
+      const knownIds = new Set(conversationRows.map((c: any) => c.id));
+      const recovered = new Map<string, any>();
+      for (const m of allMessages || []) {
+        if (!m.conversation_id || knownIds.has(m.conversation_id)) continue;
+        const entry = recovered.get(m.conversation_id) || { id: m.conversation_id, owner_id: m.owner_id || null, updated_at: m.created_at || "", _messages: [] };
+        entry._messages.push(m);
+        if (m.created_at && (!entry.updated_at || m.created_at > entry.updated_at)) entry.updated_at = m.created_at;
+        recovered.set(m.conversation_id, entry);
+      }
+      for (const c of recovered.values()) conversationRows.push(c);
+      conversationRows.sort((a: any, b: any) => String(b.updated_at || "").localeCompare(String(a.updated_at || "")));
+    }
+    const conversations = await Promise.all(conversationRows.map(async (c: any) => {
+      let list: any[];
+      if (Array.isArray(c._messages)) {
+        list = c._messages.slice().sort((a: any, b: any) => String(a.created_at || "").localeCompare(String(b.created_at || "")));
+      } else {
+        const { data: ms, error: messageError } = await db.from("chat_messages").select("*").eq("conversation_id", c.id).order("created_at", { ascending: true }).limit(500);
+        if (messageError) throw messageError;
+        list = ms || [];
+      }
+      const last = list[list.length - 1], firstVisitor = list.find((m: any) => m.sender === "visitor");
+      return { conversationId: c.id, updatedAt: c.updated_at || last?.created_at || "", visitorName: firstVisitor?.sender_name || "Website visitor", visitorIpAddress: firstVisitor?.ip_address || null, lastMessage: last ? publicMessage(last) : null, messagesCount: list.length };
+    }));
     return { conversations };
   }
   if (!validId(id)) return { error: "Invalid conversation ID.", status: 400 };
-  const { data: c, error: ce } = await db.from("chat_conversations").select("*").eq("id", id).maybeSingle(); if (ce) throw ce;
+  const { data: existingConversation, error: ce } = await db.from("chat_conversations").select("*").eq("id", id).maybeSingle(); if (ce) throw ce;
+  let c: any = existingConversation;
+  // Permit admins to read legacy conversations reconstructed from messages.
+  if (!c && isAdmin) {
+    const { data: firstMessage, error: messageError } = await db.from("chat_messages").select("owner_id").eq("conversation_id", id).limit(1).maybeSingle();
+    if (messageError) throw messageError;
+    if (firstMessage) c = { id, owner_id: firstMessage.owner_id || null };
+  }
   if (!c || (!isAdmin && c.owner_id && c.owner_id !== session!.sub)) return { error: "This conversation belongs to another account.", status: 403 };
   if (!isAdmin && !c.owner_id) { const { error } = await db.from("chat_conversations").update({ owner_id: session!.sub }).eq("id", id); if (error) throw error; }
   const { data: rows, error } = await db.from("chat_messages").select("*").eq("conversation_id", id).order("created_at", { ascending: true }).limit(500); if (error) throw error;
