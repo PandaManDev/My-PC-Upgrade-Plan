@@ -225,7 +225,35 @@ if(adminToken&&adminEmail.toLowerCase()!==ADMIN_LOGIN_EMAIL){adminToken='';admin
 const inboxStatus=(message,error=false)=>{const el=$('inboxStatus');el.textContent=message;el.className='inbox-status'+(error?' error':'')};
 const loginStatus=(message,error=false)=>{const el=$('loginStatus');el.textContent=message;el.className='inbox-status'+(error?' error':'')};
 const adminHeaders=()=>({Authorization:'Bearer '+adminToken});
-async function apiRequest(path,options={}){const response=await fetch(API_BASE+path,{...options,headers:{'Content-Type':'application/json',...(options.headers||{})},cache:'no-store'});const data=await response.json().catch(()=>({error:'The API returned an unreadable response.'}));if(!response.ok)throw new Error(data.error||('Request failed: HTTP '+response.status));return data;}
+async function apiRequest(path,options={}){
+  let response;
+  try{
+    response=await fetch(API_BASE+path,{...options,headers:{'Content-Type':'application/json',...(options.headers||{})},cache:'no-store'});
+  }catch(cause){
+    const error=new Error('Could not reach the support service. Check your internet connection, then try again.');
+    error.code='NETWORK_ERROR';
+    error.cause=cause;
+    throw error;
+  }
+  const data=await response.json().catch(()=>null);
+  if(!response.ok){
+    const error=new Error(data?.error||('The support service returned HTTP '+response.status+'.'));
+    error.status=response.status;
+    error.code=data?.code||('HTTP_'+response.status);
+    throw error;
+  }
+  if(!data||typeof data!=='object')throw new Error('The support service returned an unexpected response. Please retry.');
+  return data;
+}
+function friendlyApiError(error){
+  const status=Number(error?.status||0);
+  if(error?.code==='NETWORK_ERROR')return error.message;
+  if(status===401)return 'Your session may have expired. Sign in again to continue.';
+  if(status===403)return 'Access was denied. Confirm this account has administrator permission.';
+  if(status===404)return 'The requested conversation or API route could not be found.';
+  if(status===429)return 'Too many requests. Wait a moment before trying again.';
+  if(status>=500)return 'The support service is having a problem (HTTP '+status+'). Try again shortly. Details: '+(error.message||'No additional details.');
+  return error?.message||'An unexpected error occurred. Please try again.';}
 async function adminApi(url){return apiRequest(url,{method:'GET',headers:adminHeaders()});}
 
 function safeDate(value){try{return new Date(value).toLocaleString()}catch{return value||''}}
@@ -411,7 +439,26 @@ function showSignedIn(){
 }
 async function signIn(){const email=$('adminEmail').value.trim().toLowerCase(),password=$('adminPassword').value;if(!email||!password){loginStatus('Enter your website account email and password.',true);return;}if(email!==ADMIN_LOGIN_EMAIL){showAdminError();return;}$('adminSignIn').disabled=true;loginStatus('Signing in…');try{const data=await apiRequest('/account',{method:'POST',body:JSON.stringify({action:'login',email,password})});if(!data.token)throw new Error('The sign-in response did not include a session.');adminToken=data.token;adminEmail=data.user?.email||email;sessionStorage.setItem('pup_admin_session_token',adminToken);sessionStorage.setItem('pup_admin_session_email',adminEmail);$('adminPassword').value='';showSignedIn();loginStatus('Signed in. Checking administrator permission…');await loadConversations();}catch(e){adminToken='';adminEmail='';sessionStorage.removeItem('pup_admin_session_token');sessionStorage.removeItem('pup_admin_session_email');showSignedIn();loginStatus(e.message,true);}finally{$('adminSignIn').disabled=false;}}
 function signOut(){$('deleteConversation').disabled=true;adminToken='';adminEmail='';sessionStorage.removeItem('pup_admin_session_token');sessionStorage.removeItem('pup_admin_session_email');conversationCache=[];activeConversation='';renderConversations();$('chatMessages').replaceChildren();const empty=document.createElement('div');empty.className='empty';empty.textContent='Sign in and select a conversation to read messages.';$('chatMessages').append(empty);showSignedIn();inboxStatus('Signed out.');loginStatus('Sign in to securely open the inbox.');}
-async function loadConversations(){if(!adminToken){inboxStatus('Sign in to your website account first.',true);return;}$('reloadChats').disabled=true;inboxStatus('Loading conversations…');try{const data=await adminApi('/messages');const previousConversations=conversationCache;const nextConversations=data.conversations||[];checkConversationNotifications(previousConversations,nextConversations);conversationCache=nextConversations;renderConversations();$('reloadChats').disabled=false;inboxStatus('Loaded '+conversationCache.length+' conversation(s) · Last refreshed '+new Date().toLocaleTimeString()+'. Select one to read the full chat.');if(activeConversation&&!conversationCache.some(c=>c.conversationId===activeConversation))activeConversation='';if(!activeConversation&&conversationCache.length)await openConversation(conversationCache[0].conversationId);}catch(e){if(/sign in|administrator|authorized|permission/i.test(e.message)){adminToken='';adminEmail='';sessionStorage.removeItem('pup_admin_session_token');sessionStorage.removeItem('pup_admin_session_email');showSignedIn();}inboxStatus(e.message+' Ensure the admin email is configured in Supabase and pup-api is redeployed.',true);$('conversationList').replaceChildren();const empty=document.createElement('div');empty.className='empty';empty.textContent='Could not load conversations.';$('conversationList').append(empty);}finally{$('reloadChats').disabled=false;}}
+async function loadConversations(){if(!adminToken){inboxStatus('Sign in to your website account first.',true);return;}$('reloadChats').disabled=true;inboxStatus('Loading conversations…');try{const data=await adminApi('/messages');const previousConversations=conversationCache;const nextConversations=data.conversations||[];checkConversationNotifications(previousConversations,nextConversations);conversationCache=nextConversations;renderConversations();$('reloadChats').disabled=false;inboxStatus('Loaded '+conversationCache.length+' conversation(s) · Last refreshed '+new Date().toLocaleTimeString()+'. Select one to read the full chat.');if(activeConversation&&!conversationCache.some(c=>c.conversationId===activeConversation))activeConversation='';if(!activeConversation&&conversationCache.length)await openConversation(conversationCache[0].conversationId);}catch(e){
+  if(e.status===401||/sign in|administrator|authorized|permission/i.test(e.message)){
+    adminToken='';adminEmail='';
+    sessionStorage.removeItem('pup_admin_session_token');
+    sessionStorage.removeItem('pup_admin_session_email');
+    showSignedIn();
+  }
+  // Keep the last successful inbox visible during temporary failures.
+  // A failed refresh is not the same thing as an empty inbox.
+  const message=friendlyApiError(e);
+  inboxStatus('Could not refresh conversations. '+message+(conversationCache.length?' Your last loaded conversations are still shown.':''),true);
+  if(!conversationCache.length){
+    const empty=document.createElement('div');
+    empty.className='empty';
+    empty.textContent='Conversations could not be loaded. Check the status above and retry.';
+    $('conversationList').replaceChildren(empty);
+  }else{
+    renderConversations();
+  }
+}finally{$('reloadChats').disabled=false;}}
 
 function renderVisitorDetails(conversation,messages=[]){
   const account=$('visitorAccountInfo');
@@ -473,7 +520,8 @@ $('deleteConversation').addEventListener('click',deleteSelectedConversation);
 
 async function openConversation(id){activeConversation=id;$('deleteConversation').disabled=false;renderConversations();const selected=conversationCache.find(c=>c.conversationId===id);renderVisitorDetails(selected,[]);$('chatTitle').textContent=selected?.visitorName||'Website visitor';$('chatSubtitle').textContent='Visitor IP: '+(selected?.visitorIpAddress||'Unavailable for existing messages')+' · Last activity '+safeDate(selected?.updatedAt);const view=$('chatMessages');view.replaceChildren();const loading=document.createElement('div');loading.className='empty';loading.textContent='Loading messages…';view.append(loading);try{const data=await adminApi('/messages?conversationId='+encodeURIComponent(id));view.replaceChildren();const messages=data.messages||[];activeChatSignature=JSON.stringify(messages.map(m=>[m.sender,m.text,m.createdAt,m.id]));renderVisitorDetails(selected,messages);if(!messages.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No messages in this conversation yet.';view.append(empty);}for(const msg of messages){const item=document.createElement('article');item.className='chat-message '+(msg.sender==='owner'?'from-owner':'from-visitor');const meta=document.createElement('small');meta.textContent=(msg.sender==='owner'?'Panda PC Support':(msg.senderName||'Visitor'))+' · '+safeDate(msg.createdAt)+(msg.sender==='visitor'?' · IP: '+(msg.ipAddress||selected?.visitorIpAddress||'Unavailable'):'');const body=document.createElement('p');body.textContent=msg.text||'';item.append(meta,body);view.append(item);}const replyForm=document.createElement('form');replyForm.className='reply-form';replyForm.style.cssText='display:flex;gap:8px;position:sticky;bottom:0;padding:12px 0;background:#101010;';const reply=document.createElement('textarea');reply.id='visitorReply';reply.name='visitorReply';reply.rows=2;reply.maxLength=1500;reply.required=true;reply.placeholder='Write a reply to this visitor…';reply.setAttribute('aria-label','Reply to visitor');reply.style.cssText='flex:1;min-width:0;resize:vertical;background:#101010;color:#f5f5f5;border:1px solid #d4d4d4;border-radius:10px;padding:10px;font:inherit;';const sendReply=document.createElement('button');sendReply.type='submit';sendReply.className='btn primary';sendReply.textContent='Send reply';replyForm.append(reply,sendReply);const replyStatus=document.createElement('div');replyStatus.className='inbox-status';replyStatus.style.width='100%';replyForm.addEventListener('submit',async e=>{e.preventDefault();const text=reply.value.trim();if(!text)return;sendReply.disabled=true;replyStatus.textContent='Sending reply…';try{await apiRequest('/messages',{method:'POST',headers:adminHeaders(),body:JSON.stringify({action:'reply',conversationId:id,text})});reply.value='';replyStatus.textContent='Reply sent. The visitor will see it in their chat.';await openConversation(id);inboxStatus('Reply sent successfully.');}catch(err){replyStatus.textContent=err.message;replyStatus.classList.add('error');}finally{sendReply.disabled=false;}});view.append(replyForm,replyStatus);view.scrollTop=view.scrollHeight;}catch(e){view.replaceChildren();const empty=document.createElement('div');empty.className='empty';empty.textContent=e.message;view.append(empty);inboxStatus('Could not open conversation.',true);}}$('adminLoginForm').addEventListener('submit',e=>{e.preventDefault();signIn();});
 $('adminPassword').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();signIn();}});
-window.addEventListener('error',e=>{try{loginStatus('Page error: '+(e.message||'An unexpected error occurred.'),true);}catch{}});
+window.addEventListener('error',e=>{try{const message='A page error occurred: '+(e.message||'An unexpected error occurred.');if(adminToken)inboxStatus(message+' Try refreshing the page if the problem continues.',true);else loginStatus(message+' Try refreshing the page if the problem continues.',true);}catch{}});
+window.addEventListener('unhandledrejection',e=>{try{const reason=e.reason;const detail=reason&&reason.message?reason.message:String(reason||'Unknown error');if(adminToken)inboxStatus('An unexpected background task failed: '+detail,true);else loginStatus('An unexpected background task failed: '+detail,true);}catch{}});
 $('conversationSearch').addEventListener('input',renderConversations);$('conversationSort').addEventListener('change',renderConversations);$('autoRefresh').addEventListener('change',()=>{inboxStatus($('autoRefresh').checked?'Auto-refresh enabled. Inbox will refresh every 30 seconds.':'Auto-refresh paused.');});
 $('reloadChats').addEventListener('click',loadConversations);$('signOut').addEventListener('click',signOut);$('downloadSelectedChat').addEventListener('click',downloadSelectedChat);$('downloadCsv').addEventListener('click',downloadConversationCsv);$('downloadAllChats').addEventListener('click',downloadAllChats);showSignedIn();
 let autoRefreshTimer=setInterval(()=>{if(adminToken&&$('autoRefresh').checked)loadConversations();},30000);
