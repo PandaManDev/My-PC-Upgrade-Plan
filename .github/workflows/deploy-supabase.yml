@@ -7,6 +7,7 @@ on:
     paths:
       - "supabase/functions/**"
       - "supabase/config.toml"
+      - ".github/workflows/deploy-supabase.yml"
 
 jobs:
   deploy:
@@ -18,6 +19,15 @@ jobs:
         uses: supabase/setup-cli@v1
         with:
           version: latest
+      - name: Sync gift authorization key from GitHub Secret
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          GIFT_AUTH_KEY: ${{ secrets.GIFT_AUTH_KEY }}
+        run: |
+          test -n "$SUPABASE_ACCESS_TOKEN" || (echo "Missing GitHub Actions secret SUPABASE_ACCESS_TOKEN" && exit 1)
+          test -n "$GIFT_AUTH_KEY" || (echo "Missing GitHub Actions secret GIFT_AUTH_KEY" && exit 1)
+          supabase link --project-ref jitmbvmeeyqjekyxaluk
+          supabase secrets set "GIFT_AUTH_KEY=$GIFT_AUTH_KEY" --project-ref jitmbvmeeyqjekyxaluk
       - name: Deploy API
         env:
           SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
