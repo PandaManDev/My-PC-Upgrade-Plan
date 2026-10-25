@@ -19,6 +19,7 @@ In Supabase Dashboard → Project Settings / Edge Functions secrets, set:
 - `CHAT_AUTH_SECRET` = the existing secret used to sign the current account tokens. **Use the same value as the current backend or existing saved sessions will need to sign in again.** Never put this value in website JavaScript or commit it to GitHub.
 - `CHAT_ADMIN_SECRET` = the existing voice-call admin secret if owner/admin calling is enabled.
 - `CHAT_ADMIN_EMAIL` = `JJB@petlovers.com` (the account email allowed to read the website chat inbox). This is checked server-side; do not add it to frontend JavaScript.
+- `IPAPI_KEY` = your API key from [ipapi.is](https://ipapi.is/app/signup). This is required for proxy/VPN/Tor detection because anonymous requests no longer include those security flags. Keep this key only in Supabase Edge Function secrets; never add it to `index.html` or commit it to GitHub.
 
 Never use a publishable/anon key as the server key. Never commit any secret values.
 
@@ -36,6 +37,7 @@ The function supports these routes:
 - `/functions/v1/pup-api/account`
 - `/functions/v1/pup-api/messages`
 - `/functions/v1/pup-api/call`
+- `/functions/v1/pup-api/security-check` (visitor proxy/VPN/Tor detection; requires `IPAPI_KEY`)
 
 ## 4. Verify before switching the public site
 
