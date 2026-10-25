@@ -1,0 +1,4 @@
+project_id = "jitmbvmeeyqjekyxaluk"
+
+[functions.pup-api]
+verify_jwt = false
