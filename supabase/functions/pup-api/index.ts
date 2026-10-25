@@ -70,7 +70,11 @@ async function account(req: Request, url: URL) {
 function validId(v: unknown): v is string { return typeof v === "string" && /^[a-f0-9-]{36}$/i.test(v); }
 async function verifyOwner(req: Request) { return await verify((req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "")); }
 async function messages(req: Request, url: URL) {
-  const session = await verifyOwner(req); if (!session) return { error: "Please sign in to your account to use chat.", status: 401 };
+  const auth = (req.headers.get("authorization") || "").replace(/^Bearer\\s+/i, "");
+  const isAdmin = !!ADMIN_SECRET && constantEqual(auth, ADMIN_SECRET);
+  const session = isAdmin ? null : await verifyOwner(req);
+  if (isAdmin && req.method !== "GET") return { error: "Admin access is read-only for messages.", status: 405 };
+  if (!isAdmin && !session) return { error: "Please sign in to your account to use chat.", status: 401 };
   const clientIp = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim().slice(0, 100) || "Unknown";
   const publicMessage = (m: any) => ({ id: m.id, conversationId: m.conversation_id, sender: m.sender, senderName: m.sender_name, profilePicture: m.profile_picture, text: m.text, createdAt: m.created_at });
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
@@ -96,14 +100,16 @@ async function messages(req: Request, url: URL) {
   }
   const id = url.searchParams.get("conversationId") || "";
   if (!id) {
-    const { data: convs, error } = await db.from("chat_conversations").select("*").eq("owner_id", session.sub).order("updated_at", { ascending: false }).limit(200); if (error) throw error;
+    let query = db.from("chat_conversations").select("*").order("updated_at", { ascending: false }).limit(200);
+    if (!isAdmin) query = query.eq("owner_id", session!.sub);
+    const { data: convs, error } = await query; if (error) throw error;
     const conversations = await Promise.all((convs || []).map(async c => { const { data: ms } = await db.from("chat_messages").select("*").eq("conversation_id", c.id).order("created_at", { ascending: true }).limit(500); const list = ms || [], last = list[list.length - 1]; return { conversationId: c.id, updatedAt: c.updated_at || last?.created_at || "", lastMessage: last ? publicMessage(last) : null, messagesCount: list.length }; }));
     return { conversations };
   }
   if (!validId(id)) return { error: "Invalid conversation ID.", status: 400 };
   const { data: c, error: ce } = await db.from("chat_conversations").select("*").eq("id", id).maybeSingle(); if (ce) throw ce;
-  if (!c || (c.owner_id && c.owner_id !== session.sub)) return { error: "This conversation belongs to another account.", status: 403 };
-  if (!c.owner_id) { const { error } = await db.from("chat_conversations").update({ owner_id: session.sub }).eq("id", id); if (error) throw error; }
+  if (!c || (!isAdmin && c.owner_id && c.owner_id !== session!.sub)) return { error: "This conversation belongs to another account.", status: 403 };
+  if (!isAdmin && !c.owner_id) { const { error } = await db.from("chat_conversations").update({ owner_id: session!.sub }).eq("id", id); if (error) throw error; }
   const { data: rows, error } = await db.from("chat_messages").select("*").eq("conversation_id", id).order("created_at", { ascending: true }).limit(500); if (error) throw error;
   return { conversationId: id, messages: (rows || []).map(publicMessage) };
 }
