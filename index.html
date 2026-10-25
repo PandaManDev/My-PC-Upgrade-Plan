@@ -280,7 +280,7 @@ function updateTotals(){
 }
 
 
-$('reset').addEventListener('click',()=>{if(confirm('Reset all purchase checkmarks?')){state={};save();render()}});
+const resetButton=$('reset');if(resetButton)resetButton.addEventListener('click',()=>{if(confirm('Reset all purchase checkmarks?')){state={};save();render()}});
 render();
 
 const backToTop=$('backToTop');
