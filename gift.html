@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#100b1c">
+<meta name="robots" content="noindex,nofollow">
+<title>Gift a PC Upgrade · Pandas PC Upgrade Plan</title>
+<style>
+:root{color-scheme:dark;--bg:#08060d;--panel:#15101f;--line:#382747;--purple:#c084fc;--muted:#b7a9c8;--text:#fbf7ff;--blue:#0b84ff}
+*{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(ellipse at 50% 0,#55208b55,transparent 55%),var(--bg);color:var(--text);font:15px/1.6 system-ui,-apple-system,"Segoe UI",sans-serif;display:grid;place-items:center;padding:22px}.card{width:min(540px,100%);padding:clamp(22px,5vw,38px);border:1px solid #a855f755;border-radius:24px;background:linear-gradient(145deg,#1a1227,#100b18);box-shadow:0 22px 80px #0007}.brand{color:#d8b4fe;font-size:11px;font-weight:900;letter-spacing:.17em;text-transform:uppercase}.icon{font-size:38px;margin:14px 0 3px}h1{font-size:clamp(27px,6vw,38px);line-height:1.12;letter-spacing:-.045em;margin:5px 0 12px}p{color:var(--muted);margin:8px 0 17px}.product{padding:14px;border:1px solid #a78bfa35;background:#ffffff06;border-radius:14px;margin:20px 0}.product strong{display:block;font-size:16px}.product small{color:var(--muted)}label{display:block;font-size:12px;font-weight:800;margin:20px 0 7px}input{width:100%;padding:13px 14px;border:1px solid #65417f;border-radius:11px;background:#090610;color:#fff;font:inherit;outline:none}input:focus{border-color:#c084fc;box-shadow:0 0 0 3px #a855f722}.btn{width:100%;min-height:46px;display:flex;align-items:center;justify-content:center;padding:11px 14px;border:1px solid #a855f766;border-radius:11px;background:#ffffff08;color:#fff;text-decoration:none;font:inherit;font-weight:800;cursor:pointer}.primary{background:linear-gradient(110deg,#6d28d9,#a21caf);border-color:transparent}.btn:disabled{opacity:.6;cursor:wait}.actions{display:grid;gap:9px;margin-top:14px}.message{min-height:22px;font-size:12px;color:#f0abfc;margin-top:12px}.address{display:none;margin-top:18px;padding:16px;border:1px solid #86efac55;border-radius:13px;background:#86efac0c;white-space:pre-wrap;overflow-wrap:anywhere}.address.visible{display:block}.address strong{display:block;color:#bbf7d0;margin-bottom:7px}.warning{font-size:11px;color:#9f8db5;margin-top:16px}.back{display:inline-block;color:#d8b4fe;text-decoration:none;font-size:12px;margin-top:20px}.hidden{display:none!important}
+</style>
+</head>
+<body>
+<main class="card">
+<div class="brand">Pandas PC Upgrade Plan · Gift Checkout</div>
+<div class="icon" aria-hidden="true">🎁</div>
+<h1>Help upgrade the setup.</h1>
+<p>Previewing a product never reveals the shipping address. Enter the private authorization key you received to reveal the gift shipping details, then continue to the retailer.</p>
+<section class="product" aria-live="polite"><strong id="productName">Loading selected product…</strong><small id="productNote">The address stays hidden until the key is accepted.</small></section>
+<form id="giftForm">
+<label for="giftKey">Gift authorization key</label>
+<input id="giftKey" name="key" type="password" autocomplete="off" maxlength="256" required placeholder="Enter the key you were given">
+<div class="actions"><button class="btn primary" id="revealBtn" type="submit">Verify Key & Reveal Address</button></div>
+<p class="message" id="message" role="status" aria-live="polite"></p>
+</form>
+<section class="address" id="addressBox" aria-live="polite"><strong>Authorized shipping address</strong><div id="addressText"></div><div class="actions"><a class="btn primary" id="continueBuy" href="#" target="_blank" rel="noopener noreferrer">Continue to Buy This Product ↗</a><a class="btn" id="previewAgain" href="#" target="_blank" rel="noopener noreferrer">Preview Product Again ↗</a></div></section>
+<p class="warning">Keep the address private. Only share it with someone you trust to purchase and ship your gift.</p>
+<a class="back" href="./index.html">← Back to the wishlist</a>
+</main>
+<script>
+(function(){
+'use strict';
+const API='https://jitmbvmeeyqjekyxaluk.supabase.co/functions/v1/pup-api/gift-address';
+const products={
+ ram:{name:'Timetec 16 GB Kit (2 × 8 GB) DDR3/DDR3L-1600 SODIMM',url:'https://www.amazon.com/gp/product/B0CVZMT7RT/ref=ewc_pr_img_1?smid=A23AD5LOJUVSEP&psc=1'},
+ ssd:{name:'Crucial BX500 1 TB 2.5-inch SATA SSD',url:'https://www.microcenter.com/product/615041/crucial-bx500-1tb-ssd-3d-nand-sata-iii-6gb-s-25-internal-solid-state-drive?oppcref=4e2bd4e3-55fd-4440-8819-95996c210e53#tab-reviews-bm'},
+ backup:{name:'WD My Passport 2 TB Portable External Hard Drive',url:'https://www.amazon.com/gp/product/B07VTFN6HM/ref=ewc_pr_img_4?smid=A3RU3SMN7LAANL&psc=1'},
+ keyboard:{name:'RK ROYAL KLUDGE R65 Wired Mechanical Gaming Keyboard',url:'https://www.amazon.com/gp/product/B0FX4FCY74?smid=A2C750YRG25DDM&psc=1'},
+ adapter:{name:'BENFEI 4K DisplayPort-to-HDMI Adapter Cable',url:'https://www.amazon.com/DisplayPort-Adapter-Converter-Gold-Plated-Compatible/dp/B07JFTK8YV/ref=sr_1_7_sspa?s=electronics&sr=1-7-spons&sp_csd=d2lkZ2V0TmFtZT1zcF9tdGY'}
+};
+const product=products[new URLSearchParams(location.search).get('product')];
+const form=document.getElementById('giftForm'),key=document.getElementById('giftKey'),button=document.getElementById('revealBtn'),message=document.getElementById('message'),box=document.getElementById('addressBox');
+if(!product){document.getElementById('productName').textContent='Product not found';document.getElementById('productNote').textContent='Return to the wishlist and choose a product again.';form.classList.add('hidden');}
+else{document.getElementById('productName').textContent=product.name;document.getElementById('previewAgain').href=product.url;document.getElementById('continueBuy').href=product.url;}
+form.addEventListener('submit',async function(event){
+ event.preventDefault();if(!product)return;
+ button.disabled=true;button.textContent='Verifying…';message.textContent='Checking your authorization key…';box.classList.remove('visible');
+ try{
+  const response=await fetch(API,{method:'POST',headers:{'Content-Type':'application/json','Accept':'application/json'},cache:'no-store',body:JSON.stringify({key:key.value})});
+  const data=await response.json().catch(()=>({}));
+  if(!response.ok)throw new Error(data.error||'Could not verify the key. Please try again.');
+  if(typeof data.address!=='string'||!data.address.trim())throw new Error('The address is not configured yet. Please contact the wishlist owner.');
+  document.getElementById('addressText').textContent=data.address;
+  box.classList.add('visible');message.textContent='Key accepted. You can now continue to the retailer.';key.value='';form.classList.add('hidden');
+ }catch(error){message.textContent=error.message||'Unable to verify right now. Please try again.'}
+ finally{button.disabled=false;button.textContent='Verify Key & Reveal Address'}
+});
+})();
+</script>
+</body>
+</html>
