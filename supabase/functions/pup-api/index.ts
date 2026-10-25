@@ -8,6 +8,7 @@ const SERVICE_KEY = Deno.env.get("SUPABASE_SECRET_KEY") ?? Deno.env.get("SUPABAS
 const AUTH_SECRET = Deno.env.get("CHAT_AUTH_SECRET") ?? Deno.env.get("CHAT_ADMIN_SECRET") ?? "";
 const ADMIN_SECRET = Deno.env.get("CHAT_ADMIN_SECRET") ?? "";
 const ADMIN_EMAIL = (Deno.env.get("CHAT_ADMIN_EMAIL") ?? "").trim().toLowerCase();
+const IPAPI_KEY = (Deno.env.get("IPAPI_KEY") ?? "").trim();
 const SITE_ORIGIN = "https://pandamandev.github.io";
 const ALLOWED = new Set([SITE_ORIGIN, "http://localhost:3000"]);
 const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -138,6 +139,35 @@ async function messages(req: Request, url: URL) {
   const { data: rows, error } = await db.from("chat_messages").select("*").eq("conversation_id", id).order("created_at", { ascending: true }).limit(500); if (error) throw error;
   return { conversationId: id, messages: (rows || []).map(publicMessage) };
 }
+async function securityCheck(req: Request) {
+  if (req.method !== "POST") return { error: "Method not allowed.", status: 405 };
+  if (!IPAPI_KEY) return { error: "Proxy detection is not configured yet.", status: 503 };
+  const body = await req.json().catch(() => ({}));
+  const ip = String(body?.ip ?? "").trim();
+  // Accept only an IP-shaped value; never pass arbitrary URLs to the lookup API.
+  if (!ip || ip.length > 45 || !/^[0-9a-fA-F:.]+$/.test(ip) || !ip.includes(".") && !ip.includes(":")) {
+    return { error: "A valid public IP address is required.", status: 400 };
+  }
+  const response = await fetch("https://api.ipapi.is/?q=" + encodeURIComponent(ip) + "&key=" + encodeURIComponent(IPAPI_KEY), {
+    method: "GET",
+    headers: { "Accept": "application/json" },
+    signal: AbortSignal.timeout(5000),
+    cache: "no-store"
+  });
+  if (!response.ok) {
+    console.warn("IP reputation lookup returned status", response.status);
+    return { error: "Proxy detection is temporarily unavailable.", status: 503 };
+  }
+  const data = await response.json().catch(() => null);
+  if (!data || typeof data !== "object" || typeof data.is_proxy !== "boolean") {
+    return { error: "Proxy detection response did not include security flags.", status: 503 };
+  }
+  return {
+    is_proxy: data.is_proxy === true,
+    is_vpn: data.is_vpn === true,
+    is_tor: data.is_tor === true
+  };
+}
 async function call(req: Request, url: URL) {
   const auth = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
   const admin = !!ADMIN_SECRET && constantEqual(auth, ADMIN_SECRET);
@@ -171,7 +201,8 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url), route = url.pathname.split("/").filter(Boolean).at(-1) || "";
     let result: any;
-    if (route === "account") result = await account(req, url);
+    if (route === "security-check") result = await securityCheck(req);
+    else if (route === "account") result = await account(req, url);
     else if (route === "messages") result = await messages(req, url);
     else if (route === "call") result = await call(req, url);
     else return json({ error: "Unknown API route." }, 404, origin);
