@@ -8,6 +8,7 @@ Welcome to my PC Upgrade Plan! This project tracks my PC upgrade wishlist and re
 - **Gift Page:** https://pandamandev.github.io/My-PC-Upgrade-Plan/gift.html
 - **Inbox Admin Panel:** https://pandamandev.github.io/My-PC-Upgrade-Plan/admin.html
 - **GitHub Repository:** https://github.com/PandaManDev/My-PC-Upgrade-Plan
+- **Add Products:** https://chatgpt.com/c/6adda30a-46bc-83e9-b5e7-bdd323b376b3
 
 ## 🔐 Gift Access
 
