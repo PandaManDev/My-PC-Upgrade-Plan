@@ -81,7 +81,7 @@ async function messages(req: Request, url: URL) {
   if (req.method === "GET" && !url.searchParams.get("conversationId") && !isAdmin) {
     return { error: "Administrator access required to view all conversations. Check the CHAT_ADMIN_EMAIL Supabase secret and redeploy pup-api.", status: 403 };
   }
-  const clientIp = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim().slice(0, 100) || "Unknown";
+  const clientIp = (req.headers.get("cf-connecting-ip") || req.headers.get("x-real-ip") || req.headers.get("x-client-ip") || req.headers.get("x-forwarded-for") || "").split(",")[0].trim().slice(0, 100) || "Unavailable";
   const publicMessage = (m: any, includeIp = isAdmin) => ({ id: m.id, conversationId: m.conversation_id, sender: m.sender, senderName: m.sender_name, profilePicture: m.profile_picture, text: m.text, createdAt: m.created_at, ...(includeIp && m.ip_address ? { ipAddress: String(m.ip_address).slice(0, 100) } : {}) });
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
   if (req.method === "POST" && isAdmin) {
