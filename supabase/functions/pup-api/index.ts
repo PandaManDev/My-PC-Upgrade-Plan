@@ -820,11 +820,35 @@ Deno.serve(async (req) => {
     const status = Number(result?.status || 200);
     delete result.status;
     return json(result, status, origin);
-  } catch (e) {
-    console.error(
-      "pup-api error:",
-      e instanceof Error ? e.message : "unknown"
-    );
+  } catch (e: unknown) {
+    // Supabase/PostgREST often throws plain objects rather than Error instances.
+    // Log useful diagnostics without returning internal details to the browser.
+    let diagnostic = "Unserializable thrown value";
+    if (e instanceof Error) {
+      diagnostic = [e.name, e.message].filter(Boolean).join(": ");
+    } else if (typeof e === "string") {
+      diagnostic = e;
+    } else if (e && typeof e === "object") {
+      const value = e as Record<string, unknown>;
+      const fields = ["name", "message", "code", "details", "hint"]
+        .map((key) => {
+          const field = value[key];
+          return field === undefined || field === null || field === ""
+            ? ""
+            : key + "=" + String(field);
+        })
+        .filter(Boolean);
+      try {
+        diagnostic = fields.length
+          ? fields.join(" | ")
+          : JSON.stringify(e) || diagnostic;
+      } catch {
+        diagnostic = fields.join(" | ") || diagnostic;
+      }
+    } else if (e !== null && e !== undefined) {
+      diagnostic = String(e);
+    }
+    console.error("pup-api error:", diagnostic.slice(0, 1500));
     return json({ error: "Service is temporarily unavailable." }, 503, origin);
   }
 });
