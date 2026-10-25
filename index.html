@@ -104,7 +104,7 @@ header{display:flex;justify-content:center;align-items:center;gap:20px;padding:2
 @media(prefers-reduced-motion:reduce){#pup-loading-screen *,#pup-loading-screen:before{animation:none!important;transition:none!important}#pup-loading-screen .pup-loader-track span{width:100%}}
 
 #adminPageButton[hidden]{display:none!important}
-</style>
+.gift-part-links{display:grid;grid-template-columns:1fr;gap:8px}.gift-part-links a{min-height:43px;display:flex;align-items:center;justify-content:center}.gift-part-links .preview-product{background:#ffffff07;border-color:#ffffff28}.gift-part-links .gift-product{background:linear-gradient(110deg,#5b21b6,#7e22ce);border-color:#a855f7;color:#fff;box-shadow:0 0 18px #9333ea20}@media(max-width:420px){.gift-part-links a{min-height:46px;font-size:13px}}\n</style>
 
 <style id="proxy-access-style">
 #proxyAccessDenied{position:fixed;inset:0;z-index:1000000;display:none;align-items:center;justify-content:center;padding:22px;background:rgba(3,2,8,.94);backdrop-filter:blur(14px);font-family:system-ui,-apple-system,"Segoe UI",sans-serif}
@@ -195,7 +195,7 @@ const $=id=>document.getElementById(id);const money=n=>new Intl.NumberFormat('en
 function save(){try{localStorage.setItem(storageKey,JSON.stringify(state))}catch(e){}if(window.pandaAccountSync)window.pandaAccountSync()}
 function price(p){return Number(p.price)||0}
 function purchased(p){return !!state[p.id]?.purchased}
-function render(){const shown=parts;$('partsGrid').innerHTML=shown.map(p=>'<article class="part"><div class="part-top"><span class="tag">'+p.category+'</span></div><div class="part-icon" aria-hidden="true">'+p.icon+'</div><h3>'+p.name+'</h3><p>'+p.desc+'</p><div class="part-bottom"><div><span class="price-label">CURRENT LISTED PRICE</span><strong class="price-value">'+money(p.price)+'</strong><div class="price-source">Listed at <a href="'+p.priceUrl+'" target="_blank" rel="noopener noreferrer">'+p.priceSource+' ↗</a></div></div><span class="price-updated">Price checked Oct 24, 2026</span></div>'+'<div class="part-links"><a href="'+p.priceUrl+'" target="_blank" rel="noopener noreferrer">Buy ↗</a></div></article>').join('');updateTotals()}
+function render(){const shown=parts;$('partsGrid').innerHTML=shown.map(p=>'<article class="part"><div class="part-top"><span class="tag">'+p.category+'</span></div><div class="part-icon" aria-hidden="true">'+p.icon+'</div><h3>'+p.name+'</h3><p>'+p.desc+'</p><div class="part-bottom"><div><span class="price-label">CURRENT LISTED PRICE</span><strong class="price-value">'+money(p.price)+'</strong><div class="price-source">Listed at <a href="'+p.priceUrl+'" target="_blank" rel="noopener noreferrer">'+p.priceSource+' ↗</a></div></div><span class="price-updated">Price checked Oct 24, 2026</span></div>'+'<div class="part-links gift-part-links"><a class="preview-product" href="'+p.url+'" target="_blank" rel="noopener noreferrer">Preview Product ↗</a><a class="gift-product" href="./gift.html?product='+encodeURIComponent(p.id)+'">Gift This Part →</a></div></article>').join('');updateTotals()}
 function updateTotals(){
  const total=parts.length,done=parts.filter(p=>purchased(p)).length,remaining=total-done,pct=total?Math.round(done/total*100):0;
  const sum=items=>items.reduce((acc,p)=>acc+price(p),0),all=sum(parts),spent=sum(parts.filter(p=>purchased(p))),left=sum(parts.filter(p=>!purchased(p)));
