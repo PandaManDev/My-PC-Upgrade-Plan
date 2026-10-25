@@ -134,6 +134,23 @@ html,body,.app,main{background:#080808!important;color:#f5f5f5}
 .auto-refresh-label input{accent-color:#f5f5f5}
 @media(max-width:850px){.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
 @media(max-width:520px){.stats-grid{gap:8px}.stat-card{padding:13px}.stat-card strong{font-size:23px}.inbox-filterbar{align-items:stretch}.inbox-filterbar input[type=search],.inbox-filterbar select{width:100%;max-width:none}.auto-refresh-label{padding:4px 0}.inbox-toolbar .top-actions{flex-wrap:wrap}.inbox-toolbar .top-actions .btn{font-size:11px;padding:8px}}
+
+/* iMessage-inspired bubbles: visitor messages neutral, admin replies blue */
+.chat-view{background:#f4f4f8!important;color:#17171b!important}
+.chat-message{border:0!important;border-radius:18px!important;line-height:1.5;box-shadow:0 1px 1px #0000000a}
+.chat-message.from-visitor{margin-right:auto;margin-left:0;background:#e5e5ea!important;color:#17171b!important;border-bottom-left-radius:5px!important}
+.chat-message.from-owner{margin-left:auto;margin-right:0;background:#0b84ff!important;color:#fff!important;border-bottom-right-radius:5px!important}
+.chat-message small{color:inherit!important;opacity:.72}
+.reply-form{background:#f4f4f8!important;border-color:#dedee5!important}
+.reply-form textarea{background:#fff!important;color:#17171b!important;border:1px solid #d2d2da!important;border-radius:20px!important}
+.reply-form .btn.primary{background:#0b84ff!important;border-color:#0b84ff!important;color:#fff!important;border-radius:20px}
+@media(prefers-color-scheme:dark){
+ .chat-view{background:#101014!important;color:#f5f5f7!important}
+ .chat-message.from-visitor{background:#303038!important;color:#f5f5f7!important}
+ .chat-message.from-owner{background:#0b84ff!important;color:#fff!important}
+ .reply-form{background:#19191f!important;border-color:#34343a!important}
+ .reply-form textarea{background:#25252b!important;color:#fff!important;border-color:#41414a!important}
+}
 </style>
 </head>
 <body>
