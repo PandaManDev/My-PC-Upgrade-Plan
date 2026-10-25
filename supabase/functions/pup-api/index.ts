@@ -7,6 +7,7 @@ const SUPABASE_URL = Deno.env.get("SUPABASE_URL") ?? "";
 const SERVICE_KEY = Deno.env.get("SUPABASE_SECRET_KEY") ?? Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? "";
 const AUTH_SECRET = Deno.env.get("CHAT_AUTH_SECRET") ?? Deno.env.get("CHAT_ADMIN_SECRET") ?? "";
 const ADMIN_SECRET = Deno.env.get("CHAT_ADMIN_SECRET") ?? "";
+const ADMIN_EMAIL = (Deno.env.get("CHAT_ADMIN_EMAIL") ?? "").trim().toLowerCase();
 const SITE_ORIGIN = "https://pandamandev.github.io";
 const ALLOWED = new Set([SITE_ORIGIN, "http://localhost:3000"]);
 const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -70,11 +71,10 @@ async function account(req: Request, url: URL) {
 function validId(v: unknown): v is string { return typeof v === "string" && /^[a-f0-9-]{36}$/i.test(v); }
 async function verifyOwner(req: Request) { return await verify((req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "")); }
 async function messages(req: Request, url: URL) {
-  const auth = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
-  const isAdmin = !!ADMIN_SECRET && constantEqual(auth, ADMIN_SECRET);
-  const session = isAdmin ? null : await verifyOwner(req);
+  const session = await verifyOwner(req);
+  const isAdmin = !!session && !!ADMIN_EMAIL && session.email.toLowerCase() === ADMIN_EMAIL;
   if (isAdmin && req.method !== "GET") return { error: "Admin access is read-only for messages.", status: 405 };
-  if (!isAdmin && !session) return { error: "Please sign in to your account to use chat.", status: 401 };
+  if (!session) return { error: "Please sign in to your account to use chat.", status: 401 };
   const clientIp = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim().slice(0, 100) || "Unknown";
   const publicMessage = (m: any) => ({ id: m.id, conversationId: m.conversation_id, sender: m.sender, senderName: m.sender_name, profilePicture: m.profile_picture, text: m.text, createdAt: m.created_at });
   const body = req.method === "POST" ? await req.json().catch(() => ({})) : {};
