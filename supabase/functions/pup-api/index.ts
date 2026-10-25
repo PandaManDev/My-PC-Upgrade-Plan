@@ -9,6 +9,8 @@ const AUTH_SECRET = Deno.env.get("CHAT_AUTH_SECRET") ?? Deno.env.get("CHAT_ADMIN
 const ADMIN_SECRET = Deno.env.get("CHAT_ADMIN_SECRET") ?? "";
 const ADMIN_EMAIL = (Deno.env.get("CHAT_ADMIN_EMAIL") ?? "").trim().toLowerCase();
 const IPAPI_KEY = (Deno.env.get("IPAPI_KEY") ?? "").trim();
+const GIFT_AUTH_KEY = Deno.env.get("GIFT_AUTH_KEY") ?? "";
+const GIFT_SHIPPING_ADDRESS = Deno.env.get("GIFT_SHIPPING_ADDRESS") ?? "";
 const SITE_ORIGIN = "https://pandamandev.github.io";
 const ALLOWED = new Set([SITE_ORIGIN, "http://localhost:3000"]);
 const db = createClient(SUPABASE_URL, SERVICE_KEY, { auth: { persistSession: false, autoRefreshToken: false } });
@@ -189,6 +191,47 @@ async function messages(req: Request, url: URL) {
   const { data: rows, error } = await db.from("chat_messages").select("*").eq("conversation_id", id).order("created_at", { ascending: true }).limit(500); if (error) throw error;
   return { conversationId: id, messages: (rows || []).map(publicMessage) };
 }
+async function giftAddress(req: Request) {
+  if (req.method !== "POST") return { error: "Method not allowed.", status: 405 };
+  if (!GIFT_AUTH_KEY || !GIFT_SHIPPING_ADDRESS) return { error: "Gift address access is not configured yet.", status: 503 };
+  const body = await req.json().catch(() => ({}));
+  const key = typeof body?.key === "string" ? body.key.trim() : "";
+  if (!key || key.length > 256) return { error: "Enter your gift authorization key.", status: 400 };
+
+  // Rate-limit failed attempts per network address. Only a one-way hash of the
+  // visitor IP is stored; the address and authorization key are never stored.
+  const forwarded = (req.headers.get("x-forwarded-for") || "").split(",")[0].trim();
+  const remote = forwarded || req.headers.get("x-real-ip") || "unknown";
+  const ipHash = await emailHash("gift:" + remote);
+  const now = Date.now();
+  const { data: row, error: readError } = await db.from("gift_access_attempts").select("*").eq("ip_hash", ipHash).maybeSingle();
+  if (readError) throw readError;
+  if (row?.blocked_until && Date.parse(row.blocked_until) > now) {
+    return { error: "Too many attempts. Please try again later.", status: 429 };
+  }
+  const windowMs = 15 * 60 * 1000;
+  const sameWindow = row?.window_started && now - Date.parse(row.window_started) < windowMs;
+  const attempts = sameWindow ? Number(row.attempts || 0) : 0;
+  if (!constantEqual(key, GIFT_AUTH_KEY)) {
+    const nextAttempts = attempts + 1;
+    const blockedUntil = nextAttempts >= 8 ? new Date(now + 30 * 60 * 1000).toISOString() : null;
+    const record = {
+      ip_hash: ipHash,
+      attempts: blockedUntil ? 0 : nextAttempts,
+      window_started: sameWindow ? row.window_started : new Date(now).toISOString(),
+      blocked_until: blockedUntil
+    };
+    const { error } = await db.from("gift_access_attempts").upsert(record, { onConflict: "ip_hash" });
+    if (error) throw error;
+    return { error: blockedUntil ? "Too many incorrect keys. Try again in 30 minutes." : "That authorization key is not valid.", status: blockedUntil ? 429 : 401 };
+  }
+  const { error: resetError } = await db.from("gift_access_attempts").upsert({
+    ip_hash: ipHash, attempts: 0, window_started: new Date(now).toISOString(), blocked_until: null
+  }, { onConflict: "ip_hash" });
+  if (resetError) throw resetError;
+  return { address: GIFT_SHIPPING_ADDRESS, message: "Authorization accepted." };
+}
+
 async function securityCheck(req: Request) {
   if (req.method !== "POST") return { error: "Method not allowed.", status: 405 };
   if (!IPAPI_KEY) return { error: "Proxy detection is not configured yet.", status: 503 };
@@ -251,7 +294,8 @@ Deno.serve(async (req) => {
   try {
     const url = new URL(req.url), route = url.pathname.split("/").filter(Boolean).at(-1) || "";
     let result: any;
-    if (route === "security-check") result = await securityCheck(req);
+    if (route === "gift-address") result = await giftAddress(req);
+    else if (route === "security-check") result = await securityCheck(req);
     else if (route === "account") result = await account(req, url);
     else if (route === "messages") result = await messages(req, url);
     else if (route === "call") result = await call(req, url);
