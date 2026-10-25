@@ -1308,3 +1308,51 @@ img{max-width:100%}
 @media(max-width:700px){body{background-attachment:scroll!important;background-position:center!important}section,.card,.dash-card,.progress-card,.summary-card,.budget-panel,.spec-card,.wishlist-card,.product-card,.panel,.stat-card,.metric-card,.upgrade-card{border-radius:13px!important}}
 @media(prefers-reduced-motion:reduce){button,.btn,a.button{transition:none}}
 </style>
+
+
+<style id="panda-cosmic-effects-v2">
+/* Extra atmosphere: aurora haze, luminous edges, and subtle interface motion */
+body:after{
+ content:"";position:fixed;inset:-18%;z-index:-1;pointer-events:none;opacity:.52;
+ background:
+  radial-gradient(ellipse at 16% 24%,rgba(155,45,255,.22),transparent 28%),
+  radial-gradient(ellipse at 78% 38%,rgba(0,204,255,.17),transparent 30%),
+  radial-gradient(ellipse at 50% 92%,rgba(90,37,255,.2),transparent 32%);
+ filter:blur(38px);animation:pandaAuroraDrift 24s ease-in-out infinite alternate
+}
+@keyframes pandaAuroraDrift{0%{transform:translate3d(-1.5%,-1%,0) rotate(-2deg) scale(1)}100%{transform:translate3d(1.5%,1.5%,0) rotate(2deg) scale(1.08)}}
+section,.card,.dash-card,.progress-card,.summary-card,.budget-panel,.spec-card,.wishlist-card,.product-card,.panel,.stat-card,.metric-card,.upgrade-card{
+ position:relative;overflow:hidden;
+ transition:transform .22s ease,border-color .22s ease,box-shadow .22s ease!important
+}
+section:before,.card:before,.dash-card:before,.progress-card:before,.summary-card:before,.budget-panel:before,.spec-card:before,.wishlist-card:before,.product-card:before,.panel:before,.stat-card:before,.metric-card:before,.upgrade-card:before{
+ content:"";position:absolute;inset:0;pointer-events:none;border-radius:inherit;
+ background:linear-gradient(115deg,transparent 0%,rgba(255,255,255,.045) 35%,transparent 58%);
+ transform:translateX(-130%);transition:transform .8s ease
+}
+section:hover:before,.card:hover:before,.dash-card:hover:before,.progress-card:hover:before,.summary-card:hover:before,.budget-panel:hover:before,.spec-card:hover:before,.wishlist-card:hover:before,.product-card:hover:before,.panel:hover:before,.stat-card:hover:before,.metric-card:hover:before,.upgrade-card:hover:before{transform:translateX(130%)}
+section:hover,.card:hover,.dash-card:hover,.progress-card:hover,.summary-card:hover,.budget-panel:hover,.spec-card:hover,.wishlist-card:hover,.product-card:hover,.panel:hover,.stat-card:hover,.metric-card:hover,.upgrade-card:hover{
+ transform:translateY(-3px);border-color:rgba(53,220,255,.8)!important;
+ box-shadow:0 0 28px rgba(111,51,255,.2),0 0 13px rgba(0,204,255,.09),inset 0 1px rgba(255,255,255,.08)!important
+}
+h1{filter:drop-shadow(0 0 12px rgba(146,65,255,.28))}
+button,.btn,a.button,input[type=submit]{
+ position:relative;overflow:hidden
+}
+button:after,.btn:after,a.button:after,input[type=submit]:after{
+ content:"";position:absolute;top:-60%;left:-70%;width:42%;height:220%;transform:rotate(24deg);
+ background:linear-gradient(90deg,transparent,rgba(255,255,255,.25),transparent);
+ transition:left .65s ease;pointer-events:none
+}
+button:hover:after,.btn:hover:after,a.button:hover:after,input[type=submit]:hover:after{left:140%}
+a:not(.button):hover{filter:drop-shadow(0 0 7px rgba(65,221,255,.55))}
+input:focus,select:focus,textarea:focus{outline:none!important;border-color:#7e70ff!important;box-shadow:0 0 0 3px rgba(126,74,255,.18),0 0 18px rgba(64,189,255,.12)!important}
+::selection{background:rgba(132,61,255,.55);color:white}
+@keyframes pandaSoftPulse{0%,100%{box-shadow:0 0 10px rgba(112,52,255,.12)}50%{box-shadow:0 0 20px rgba(112,52,255,.27)}}
+.progress-card,.progress-container,.progress-wrap{animation:pandaSoftPulse 5s ease-in-out infinite}
+@media(prefers-reduced-motion:reduce){
+ body:after{animation:none!important}
+ section,.card,.dash-card,.progress-card,.summary-card,.budget-panel,.spec-card,.wishlist-card,.product-card,.panel,.stat-card,.metric-card,.upgrade-card,button,.btn,a.button{transition:none!important;animation:none!important}
+ section:hover,.card:hover,.dash-card:hover,.progress-card:hover,.summary-card:hover,.budget-panel:hover,.spec-card:hover,.wishlist-card:hover,.product-card:hover,.panel:hover,.stat-card:hover,.metric-card:hover,.upgrade-card:hover{transform:none}
+}
+</style>
