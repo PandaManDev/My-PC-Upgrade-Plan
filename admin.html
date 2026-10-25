@@ -120,6 +120,20 @@ html,body,.app,main{background:#080808!important;color:#f5f5f5}
 .visitor-detail-note{margin-top:7px;color:#929292;font-size:10px;line-height:1.45}
 @media(max-width:650px){.visitor-details{grid-template-columns:1fr;padding:10px}.visitor-detail-card{padding:10px}}
 
+
+.stats-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:12px;margin:0 0 18px}
+.stat-card{min-width:0;padding:16px 18px;border:1px solid #303030;border-radius:13px;background:linear-gradient(145deg,#141414,#0e0e0e)}
+.stat-label{display:block;color:#aaa;font-size:11px;font-weight:750;letter-spacing:.08em;text-transform:uppercase}
+.stat-card strong{display:block;margin:8px 0 3px;font-size:27px;letter-spacing:-.04em;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.stat-card small{display:block;color:#888;font-size:11px}
+.inbox-filterbar{display:flex;align-items:center;gap:10px;flex-wrap:wrap;padding:12px 15px;border-bottom:1px solid #303030;background:#101010}
+.inbox-filterbar input[type=search],.inbox-filterbar select{min-height:40px;border:1px solid #383838;border-radius:9px;padding:9px 11px;background:#090909;color:#f5f5f5;outline:none}
+.inbox-filterbar input[type=search]{flex:1;min-width:190px}
+.inbox-filterbar select{max-width:100%}
+.auto-refresh-label{display:flex;align-items:center;gap:7px;color:#bbb;font-size:12px;white-space:nowrap}
+.auto-refresh-label input{accent-color:#f5f5f5}
+@media(max-width:850px){.stats-grid{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:520px){.stats-grid{gap:8px}.stat-card{padding:13px}.stat-card strong{font-size:23px}.inbox-filterbar{align-items:stretch}.inbox-filterbar input[type=search],.inbox-filterbar select{width:100%;max-width:none}.auto-refresh-label{padding:4px 0}.inbox-toolbar .top-actions{flex-wrap:wrap}.inbox-toolbar .top-actions .btn{font-size:11px;padding:8px}}
 </style>
 </head>
 <body>
@@ -154,7 +168,18 @@ html,body,.app,main{background:#080808!important;color:#f5f5f5}
 <main>
   <div class="page-heading"><div><h1>Message inbox</h1><p>Read visitor messages and reply from one place.</p></div><span class="tag"><span class="dot"></span> Support inbox</span></div>
   <section class="inbox-shell" id="chatInbox">
-    <div class="inbox-toolbar"><h2>Website conversations</h2><div class="top-actions"><button class="btn" id="downloadSelectedChat" type="button" disabled>Download this chat</button><button class="btn primary" id="downloadAllChats" type="button">Download all chats</button><span class="tag" id="conversationCount">0 conversations</span></div></div>
+    <section class="stats-grid" aria-label="Inbox statistics">
+  <article class="stat-card"><span class="stat-label">Conversations</span><strong id="statConversations">0</strong><small>All loaded chats</small></article>
+  <article class="stat-card"><span class="stat-label">Messages</span><strong id="statMessages">0</strong><small>Reported by the inbox API</small></article>
+  <article class="stat-card"><span class="stat-label">Visitors</span><strong id="statVisitors">0</strong><small>Unique conversation visitors</small></article>
+  <article class="stat-card"><span class="stat-label">Latest activity</span><strong id="statLatest">—</strong><small id="statLatestDetail">Waiting for inbox data</small></article>
+</section>
+<div class="inbox-toolbar"><h2>Website conversations</h2><div class="top-actions"><button class="btn" id="downloadSelectedChat" type="button" disabled>Download this chat</button><button class="btn primary" id="downloadAllChats" type="button">Download all chats</button><span class="tag" id="conversationCount">0 conversations</span></div></div>
+<div class="inbox-filterbar">
+  <input id="conversationSearch" type="search" placeholder="Search name, IP, or message…" aria-label="Search conversations">
+  <select id="conversationSort" aria-label="Sort conversations"><option value="newest">Newest activity</option><option value="oldest">Oldest activity</option><option value="mostMessages">Most messages</option><option value="name">Visitor name A–Z</option></select>
+  <label class="auto-refresh-label"><input id="autoRefresh" type="checkbox" checked> Auto-refresh every 30 seconds</label>
+</div>
     <div id="adminSession" hidden class="session-row"><span id="signedInAs" class="tag"></span><div class="session-actions"><button class="btn" id="signOut" type="button">Sign out</button></div></div>
     <div id="inboxStatus" class="inbox-status" role="status" style="padding:10px 15px">Administrator sign-in required.</div>
     <div class="inbox-layout">
@@ -253,8 +278,43 @@ async function downloadAllChats(){
   }catch(e){inboxStatus('Could not export all chats: '+e.message,true);}
   finally{button.disabled=false;button.textContent='Download all chats';}
 }
-function renderConversations(){ $('downloadSelectedChat').disabled=!activeConversation; const list=$('conversationList');list.replaceChildren();$('conversationCount').textContent=conversationCache.length+' conversation'+(conversationCache.length===1?'':'s');if(!conversationCache.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No conversations found.';list.append(empty);return;}for(const conv of conversationCache){const b=document.createElement('button');b.type='button';b.className='conv-item'+(conv.conversationId===activeConversation?' active':'');const title=document.createElement('strong');title.textContent=conv.visitorName||'Website visitor';const detail=document.createElement('small');detail.textContent=(conv.visitorIpAddress?'IP '+conv.visitorIpAddress+' · ':'')+(conv.lastMessage?.text||'No messages yet').slice(0,90)+' · '+safeDate(conv.updatedAt);b.append(title,detail);b.addEventListener('click',()=>openConversation(conv.conversationId));list.append(b);}}
-
+function updateStats(){
+  const count=conversationCache.length;
+  const messages=conversationCache.reduce((sum,c)=>sum+Number(c.messagesCount||0),0);
+  const visitors=new Set(conversationCache.map(c=>c.ownerId||c.owner_id||c.visitorAccountId||c.conversationId).filter(Boolean)).size;
+  const latest=[...conversationCache].sort((a,b)=>new Date(b.updatedAt||0)-new Date(a.updatedAt||0))[0];
+  $('statConversations').textContent=count.toLocaleString();
+  $('statMessages').textContent=messages.toLocaleString();
+  $('statVisitors').textContent=visitors.toLocaleString();
+  $('statLatest').textContent=latest?.updatedAt?new Date(latest.updatedAt).toLocaleDateString(): '—';
+  $('statLatestDetail').textContent=latest?.updatedAt?new Date(latest.updatedAt).toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}):'No activity yet';
+}
+function renderConversations(){
+  $('downloadSelectedChat').disabled=!activeConversation;
+  updateStats();
+  const list=$('conversationList');list.replaceChildren();
+  const query=$('conversationSearch').value.trim().toLowerCase();
+  const sort=$('conversationSort').value;
+  const filtered=conversationCache.filter(conv=>{
+    const searchable=[conv.visitorName,conv.visitorIpAddress,conv.lastMessage?.text,conv.conversationId].filter(Boolean).join(' ').toLowerCase();
+    return searchable.includes(query);
+  });
+  filtered.sort((a,b)=>{
+    if(sort==='oldest')return new Date(a.updatedAt||0)-new Date(b.updatedAt||0);
+    if(sort==='mostMessages')return Number(b.messagesCount||0)-Number(a.messagesCount||0);
+    if(sort==='name')return String(a.visitorName||'Website visitor').localeCompare(String(b.visitorName||'Website visitor'));
+    return new Date(b.updatedAt||0)-new Date(a.updatedAt||0);
+  });
+  $('conversationCount').textContent=(query?filtered.length+' of ':'')+conversationCache.length+' conversation'+(conversationCache.length===1?'':'s');
+  if(!filtered.length){const empty=document.createElement('div');empty.className='empty';empty.textContent=query?'No conversations match your search.':'No conversations found.';list.append(empty);return;}
+  for(const conv of filtered){
+    const b=document.createElement('button');b.type='button';b.className='conv-item'+(conv.conversationId===activeConversation?' active':'');
+    const title=document.createElement('strong');title.textContent=conv.visitorName||'Website visitor';
+    const detail=document.createElement('small');
+    detail.textContent=(conv.visitorIpAddress?'IP '+conv.visitorIpAddress+' · ':'')+(conv.lastMessage?.text||'No messages yet').slice(0,90)+' · '+(conv.messagesCount||0)+' messages · '+safeDate(conv.updatedAt);
+    b.append(title,detail);b.addEventListener('click',()=>openConversation(conv.conversationId));list.append(b);
+  }
+}
 function showAdminError(){const popup=$('adminErrorPopup');popup.hidden=false;$('adminErrorClose').focus();}
 function closeAdminError(){$('adminErrorPopup').hidden=true;}
 $('adminErrorClose').addEventListener('click',closeAdminError);
@@ -300,7 +360,10 @@ function renderVisitorDetails(conversation,messages=[]){
 async function openConversation(id){activeConversation=id;renderConversations();const selected=conversationCache.find(c=>c.conversationId===id);renderVisitorDetails(selected,[]);$('chatTitle').textContent=selected?.visitorName||'Website visitor';$('chatSubtitle').textContent='Visitor IP: '+(selected?.visitorIpAddress||'Unavailable for existing messages')+' · Last activity '+safeDate(selected?.updatedAt);const view=$('chatMessages');view.replaceChildren();const loading=document.createElement('div');loading.className='empty';loading.textContent='Loading messages…';view.append(loading);try{const data=await adminApi('/messages?conversationId='+encodeURIComponent(id));view.replaceChildren();const messages=data.messages||[];renderVisitorDetails(selected,messages);if(!messages.length){const empty=document.createElement('div');empty.className='empty';empty.textContent='No messages in this conversation yet.';view.append(empty);}for(const msg of messages){const item=document.createElement('article');item.className='chat-message '+(msg.sender==='owner'?'from-owner':'from-visitor');const meta=document.createElement('small');meta.textContent=(msg.sender==='owner'?'Panda PC Support':(msg.senderName||'Visitor'))+' · '+safeDate(msg.createdAt)+(msg.sender==='visitor'?' · IP: '+(msg.ipAddress||selected?.visitorIpAddress||'Unavailable'):'');const body=document.createElement('p');body.textContent=msg.text||'';item.append(meta,body);view.append(item);}const replyForm=document.createElement('form');replyForm.className='reply-form';replyForm.style.cssText='display:flex;gap:8px;position:sticky;bottom:0;padding:12px 0;background:#101010;';const reply=document.createElement('textarea');reply.rows=2;reply.maxLength=1500;reply.required=true;reply.placeholder='Write a reply to this visitor…';reply.setAttribute('aria-label','Reply to visitor');reply.style.cssText='flex:1;min-width:0;resize:vertical;background:#101010;color:#f5f5f5;border:1px solid #d4d4d4;border-radius:10px;padding:10px;font:inherit;';const sendReply=document.createElement('button');sendReply.type='submit';sendReply.className='btn primary';sendReply.textContent='Send reply';replyForm.append(reply,sendReply);const replyStatus=document.createElement('div');replyStatus.className='inbox-status';replyStatus.style.width='100%';replyForm.addEventListener('submit',async e=>{e.preventDefault();const text=reply.value.trim();if(!text)return;sendReply.disabled=true;replyStatus.textContent='Sending reply…';try{await apiRequest('/messages',{method:'POST',headers:adminHeaders(),body:JSON.stringify({action:'reply',conversationId:id,text})});reply.value='';replyStatus.textContent='Reply sent. The visitor will see it in their chat.';await openConversation(id);inboxStatus('Reply sent successfully.');}catch(err){replyStatus.textContent=err.message;replyStatus.classList.add('error');}finally{sendReply.disabled=false;}});view.append(replyForm,replyStatus);view.scrollTop=view.scrollHeight;}catch(e){view.replaceChildren();const empty=document.createElement('div');empty.className='empty';empty.textContent=e.message;view.append(empty);inboxStatus('Could not open conversation.',true);}}$('adminLoginForm').addEventListener('submit',e=>{e.preventDefault();signIn();});
 $('adminPassword').addEventListener('keydown',e=>{if(e.key==='Enter'){e.preventDefault();signIn();}});
 window.addEventListener('error',e=>{try{loginStatus('Page error: '+(e.message||'An unexpected error occurred.'),true);}catch{}});
+$('conversationSearch').addEventListener('input',renderConversations);$('conversationSort').addEventListener('change',renderConversations);$('autoRefresh').addEventListener('change',()=>{inboxStatus($('autoRefresh').checked?'Auto-refresh enabled. Inbox will refresh every 30 seconds.':'Auto-refresh paused.');});
 $('reloadChats').addEventListener('click',loadConversations);$('signOut').addEventListener('click',signOut);$('downloadSelectedChat').addEventListener('click',downloadSelectedChat);$('downloadAllChats').addEventListener('click',downloadAllChats);showSignedIn();
+let autoRefreshTimer=setInterval(()=>{if(adminToken&&$('autoRefresh').checked&&!document.hidden)loadConversations();},30000);
+document.addEventListener('visibilitychange',()=>{if(!document.hidden&&adminToken&&$('autoRefresh').checked)loadConversations();});
 if(adminToken){loadConversations();}else{$('conversationList').replaceChildren();const empty=document.createElement('div');empty.className='empty';empty.textContent='Sign in and select a conversation to read messages.';$('conversationList').append(empty);}
 
 
