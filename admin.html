@@ -47,7 +47,6 @@ main{width:min(1440px,100%);margin:0 auto;padding:24px clamp(12px,2vw,24px);flex
 <script>
 
 const $=id=>document.getElementById(id);
-$('year').textContent=new Date().getFullYear();
 const API_BASE='https://jitmbvmeeyqjekyxaluk.supabase.co/functions/v1/pup-api';
 let activeConversation='';let conversationCache=[];let adminToken=sessionStorage.getItem('pup_admin_session_token')||'';let adminEmail=sessionStorage.getItem('pup_admin_session_email')||'';
 const inboxStatus=(message,error=false)=>{const el=$('inboxStatus');el.textContent=message;el.className='inbox-status'+(error?' error':'')};
