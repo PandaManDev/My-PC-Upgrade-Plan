@@ -1213,3 +1213,66 @@ select:focus-visible {
   .spec:hover { transform: none; }
 }
 </style>
+
+
+<style id="cosmic-animated-background">
+/* Immersive animated galaxy backdrop */
+html { background:#050711; }
+body {
+  position:relative;
+  isolation:isolate;
+  background:
+    radial-gradient(ellipse at 12% 8%, rgba(113,55,255,.28) 0%, transparent 38%),
+    radial-gradient(ellipse at 88% 22%, rgba(0,190,255,.17) 0%, transparent 34%),
+    radial-gradient(ellipse at 55% 78%, rgba(128,45,255,.16) 0%, transparent 42%),
+    linear-gradient(160deg,#050711 0%,#090b20 48%,#050711 100%) !important;
+  background-attachment:fixed !important;
+  overflow-x:hidden;
+}
+body::before, body::after {
+  content:"";
+  position:fixed;
+  inset:-25%;
+  z-index:-1;
+  pointer-events:none;
+}
+body::before {
+  background:
+    radial-gradient(ellipse at 22% 32%, rgba(105,58,255,.20) 0%, transparent 25%),
+    radial-gradient(ellipse at 74% 52%, rgba(0,195,255,.13) 0%, transparent 24%),
+    radial-gradient(ellipse at 48% 82%, rgba(214,55,255,.12) 0%, transparent 28%);
+  filter:blur(38px);
+  animation: cosmicNebulaDrift 26s ease-in-out infinite alternate;
+}
+body::after {
+  opacity:.48;
+  background-image:
+    radial-gradient(1px 1px at 7% 18%, #fff 99%, transparent),
+    radial-gradient(2px 2px at 19% 73%, #bcaaff 99%, transparent),
+    radial-gradient(1px 1px at 31% 42%, #fff 99%, transparent),
+    radial-gradient(1.5px 1.5px at 44% 12%, #a9eaff 99%, transparent),
+    radial-gradient(1px 1px at 57% 64%, #fff 99%, transparent),
+    radial-gradient(2px 2px at 69% 28%, #d4baff 99%, transparent),
+    radial-gradient(1px 1px at 82% 81%, #fff 99%, transparent),
+    radial-gradient(1px 1px at 94% 47%, #9deaff 99%, transparent),
+    radial-gradient(1px 1px at 14% 91%, #fff 99%, transparent),
+    radial-gradient(1.5px 1.5px at 88% 10%, #fff 99%, transparent);
+  background-size:320px 280px,410px 360px,370px 310px,440px 390px,350px 300px,470px 410px,390px 340px,430px 370px,360px 320px,490px 420px;
+  animation: cosmicStarsFloat 100s linear infinite;
+}
+@keyframes cosmicNebulaDrift {
+  from { transform:translate3d(-2%, -1%, 0) scale(1); }
+  to { transform:translate3d(2%, 2%, 0) scale(1.08); }
+}
+@keyframes cosmicStarsFloat {
+  from { transform:translateY(0); }
+  to { transform:translateY(-180px); }
+}
+/* Keep the content crisp above the atmospheric background */
+body > * { position:relative; }
+header, main, footer, .container, .app, .dashboard, section { position:relative; }
+@media (prefers-reduced-motion: reduce) {
+  body::before, body::after { animation:none !important; }
+}
+</style>
+
