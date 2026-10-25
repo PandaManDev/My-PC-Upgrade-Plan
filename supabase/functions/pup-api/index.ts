@@ -70,7 +70,7 @@ async function account(req: Request, url: URL) {
 function validId(v: unknown): v is string { return typeof v === "string" && /^[a-f0-9-]{36}$/i.test(v); }
 async function verifyOwner(req: Request) { return await verify((req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "")); }
 async function messages(req: Request, url: URL) {
-  const auth = (req.headers.get("authorization") || "").replace(/^Bearer\\s+/i, "");
+  const auth = (req.headers.get("authorization") || "").replace(/^Bearer\s+/i, "");
   const isAdmin = !!ADMIN_SECRET && constantEqual(auth, ADMIN_SECRET);
   const session = isAdmin ? null : await verifyOwner(req);
   if (isAdmin && req.method !== "GET") return { error: "Admin access is read-only for messages.", status: 405 };
