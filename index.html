@@ -117,6 +117,82 @@ header{display:flex;justify-content:center;align-items:center;gap:20px;padding:2
 #proxyAccessDenied .proxy-denied-note{margin-top:20px;padding-top:14px;border-top:1px solid #ffffff18;color:#94a3b8;font-size:12px}
 body.proxy-access-blocked{overflow:hidden}
 </style>
+
+<style>
+/* Mobile UI refresh — October 2026 */
+@media(max-width:700px){
+  html{scroll-padding-top:115px}
+  body{font-size:15px;-webkit-text-size-adjust:100%}
+  .wrap{width:calc(100% - 24px)}
+  .site-header{grid-template-columns:minmax(0,1fr) auto;padding:9px 12px;gap:8px}
+  .site-header .brand-label{max-width:clamp(100px,35vw,165px)}
+  .site-header .header-actions .button{min-height:42px;padding:8px 10px}
+  .site-nav{margin-inline:-2px;padding:3px 2px 7px;gap:6px;scroll-snap-type:x proximity}
+  .site-nav a{min-height:40px;padding:8px 12px;scroll-snap-align:start}
+  .hero{padding:30px 0 22px}
+  .hero .button{min-height:46px;padding:12px 16px}
+  .dashboard{margin-bottom:28px;padding:15px}
+  .dashboard-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .dashboard-grid .dash-card:first-child{grid-column:1/-1}
+  .dash-card{padding:13px;overflow-wrap:anywhere}
+  .dash-number{font-size:clamp(24px,7vw,31px)}
+  .spec-grid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  .spec{min-height:75px}
+  .summary{grid-template-columns:repeat(3,minmax(0,1fr))}
+  .metric{min-width:0;overflow-wrap:anywhere}
+  .metric strong{font-size:clamp(17px,5vw,22px)}
+  .filters{flex-wrap:nowrap;overflow-x:auto;padding:2px 2px 8px;margin-right:-2px;scrollbar-width:thin;overscroll-behavior-x:contain}
+  .filter{flex:0 0 auto;min-height:40px;padding:9px 13px}
+  .parts{grid-template-columns:minmax(0,1fr)!important;gap:12px}
+  .part{padding:15px;min-width:0}
+  .part-top{align-items:center}
+  .part h3{font-size:18px}
+  .part p{line-height:1.55}
+  .part .part-bottom{align-items:center;flex-wrap:wrap}
+  .part-links{gap:9px}
+  .part-links a{min-height:46px;padding:11px 9px}
+  .toggle{width:30px;height:30px}
+  .budget{padding:17px;gap:15px}
+  .budget-controls{width:100%;align-items:stretch}
+  .budget-input{width:100%;min-height:44px}
+  .budget-controls .button{min-height:44px}
+  .footer{padding-bottom:calc(24px + env(safe-area-inset-bottom));gap:8px}
+  input,button,a{-webkit-tap-highlight-color:transparent}
+}
+@media(max-width:420px){
+  .wrap{width:calc(100% - 20px)}
+  .site-header{padding:8px 10px;gap:6px}
+  .site-header .brand{gap:6px}
+  .site-header .brand-label{max-width:105px}
+  .site-header .header-actions .button{padding:7px 8px;font-size:11px}
+  .site-nav a{font-size:11px;padding:8px 10px}
+  .hero h1{font-size:clamp(32px,10vw,42px)}
+  .hero p{font-size:14px}
+  .dashboard-grid{gap:8px}
+  .dash-card{padding:11px}
+  .dash-costs{grid-template-columns:1fr 1fr}
+  .dash-cost{min-width:0}
+  .summary{gap:6px}
+  .metric{padding:10px 7px}
+  .metric span{font-size:10px;line-height:1.35}
+  .metric strong{font-size:17px}
+  .spec-grid{gap:7px}
+  .spec{padding:11px;min-height:70px}
+  .part .part-bottom{gap:8px}
+  .price-value{font-size:21px}
+}
+@media(max-width:340px){
+  .site-header .brand-label{max-width:85px}
+  .site-header .header-actions .button{font-size:10px;padding-inline:6px}
+  .summary{grid-template-columns:1fr}
+  .dashboard-grid{grid-template-columns:1fr}
+  .dashboard-grid .dash-card:first-child{grid-column:auto}
+}
+@media(prefers-reduced-motion:reduce){
+  .site-nav{scroll-behavior:auto}
+}
+</style>
+
 </head>
 <body>
 
