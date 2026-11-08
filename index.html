@@ -1445,3 +1445,63 @@ body.cosmic-pointer-active .cosmic-cursor-glow{opacity:1}
  start();
 })();
 </script>
+
+
+<style id="panda-cosmic-effects-v3">
+/* Extra depth, shimmer, and scroll-aware presentation */
+:root{--panda-mx:50%;--panda-my:30%}
+body{background-position:center,center,center!important}
+section,.card,.dash-card,.progress-card,.summary-card,.budget-panel,.spec-card,.wishlist-card,.product-card,.panel,.stat-card,.metric-card,.upgrade-card{
+ transform-style:preserve-3d;
+}
+section:focus-within,.card:focus-within,.dash-card:focus-within,.spec-card:focus-within,.wishlist-card:focus-within{
+ border-color:rgba(78,218,255,.85)!important;
+ box-shadow:0 0 0 1px rgba(78,218,255,.16),0 0 28px rgba(112,57,255,.22)!important
+}
+.progress-card progress,.progress-wrap progress,progress{
+ filter:drop-shadow(0 0 7px rgba(150,75,255,.65))
+}
+button:active,.btn:active,a.button:active{transform:translateY(1px) scale(.985)!important}
+h2:after,.section-title:after{
+ content:"";display:block;width:min(110px,28%);height:2px;margin-top:9px;
+ background:linear-gradient(90deg,#9b53ff,#35dfff,transparent);
+ box-shadow:0 0 10px rgba(88,195,255,.5);border-radius:99px
+}
+@keyframes pandaBorderGlow{0%,100%{border-color:rgba(119,74,255,.48)}50%{border-color:rgba(52,211,255,.72)}}
+.progress-card,.budget-panel{animation:pandaBorderGlow 7s ease-in-out infinite}
+.panda-reveal-ready .panda-reveal{opacity:0;transform:translateY(14px);transition:opacity .55s ease,transform .55s ease}
+.panda-reveal-ready .panda-reveal.panda-visible{opacity:1;transform:translateY(0)}
+@media(prefers-reduced-motion:reduce){
+ .progress-card,.budget-panel{animation:none!important}
+ .panda-reveal-ready .panda-reveal{opacity:1;transform:none;transition:none}
+}
+</style>
+<script id="panda-cosmic-effects-v3-script">
+(()=>{
+ const reduce=window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+ if(reduce)return;
+ const candidates=document.querySelectorAll('section,.card,.dash-card,.progress-card,.summary-card,.budget-panel,.spec-card,.wishlist-card,.product-card,.panel,.stat-card,.metric-card,.upgrade-card');
+ if('IntersectionObserver'in window){
+  document.body.classList.add('panda-reveal-ready');
+  candidates.forEach(el=>el.classList.add('panda-reveal'));
+  const observer=new IntersectionObserver(entries=>{
+   entries.forEach(entry=>{
+    if(entry.isIntersecting){entry.target.classList.add('panda-visible');observer.unobserve(entry.target)}
+   });
+  },{threshold:.08,rootMargin:'0px 0px -25px 0px'});
+  candidates.forEach(el=>observer.observe(el));
+ }
+ // Gentle 3D card tilt on desktop only; capped to avoid excessive movement.
+ if(window.matchMedia('(min-width: 900px) and (pointer:fine)').matches){
+  candidates.forEach(el=>{
+   el.addEventListener('pointermove',e=>{
+    const r=el.getBoundingClientRect();
+    const x=(e.clientX-r.left)/r.width-.5;
+    const y=(e.clientY-r.top)/r.height-.5;
+    el.style.transform='perspective(900px) rotateX('+(-y*2.2)+'deg) rotateY('+(x*2.2)+'deg) translateY(-2px)';
+   },{passive:true});
+   el.addEventListener('pointerleave',()=>{el.style.transform='';},{passive:true});
+  });
+ }
+})();
+</script>
