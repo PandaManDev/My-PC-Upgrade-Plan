@@ -247,7 +247,8 @@ body.proxy-access-blocked{overflow:hidden}
 
 
 
-<section class="parts-section" id="parts"><div class="section-head"><div><h2>Upgrade wishlist</h2></div></div>
+<section class="parts-section" id="parts"><div class="section-head"><div><h2>Upgrade wishlist</h2><p>Find the next upgrade for your setup.</p></div></div>
+<div class="wishlist-tools" role="search"><label class="wishlist-search-label" for="wishlistSearch">Search upgrades</label><input id="wishlistSearch" class="wishlist-search" type="search" placeholder="Search RAM, storage, keyboard…" autocomplete="off"><label class="sr-only" for="wishlistCategory">Filter by category</label><select id="wishlistCategory" class="wishlist-select"><option value="all">All categories</option><option value="Memory">Memory</option><option value="Storage">Storage</option><option value="Peripherals">Peripherals</option><option value="Adapters">Adapters</option></select><label class="sr-only" for="wishlistSort">Sort upgrades</label><select id="wishlistSort" class="wishlist-select"><option value="default">Recommended order</option><option value="price-low">Price: low to high</option><option value="price-high">Price: high to low</option><option value="name">Name: A to Z</option><option value="purchased">Purchased first</option></select></div><div class="wishlist-result" id="wishlistResult" aria-live="polite"></div>
 <div class="parts" id="partsGrid"></div>
 <p class="note">Prices were checked against listed retailer pages on Oct 24, 2026. Prices and availability can change; confirm the final checkout price before ordering.</p>
 </section>
@@ -273,13 +274,28 @@ const $=id=>document.getElementById(id);const money=n=>new Intl.NumberFormat('en
 function save(){try{localStorage.setItem(storageKey,JSON.stringify(state))}catch(e){}if(window.pandaAccountSync)window.pandaAccountSync()}
 function price(p){return Number(p.price)||0}
 function purchased(p){return !!state[p.id]?.purchased}
-function render(){const shown=parts;$('partsGrid').innerHTML=shown.map(p=>'<article class="part"><div class="part-top"><span class="tag">'+p.category+'</span></div><div class="part-icon" aria-hidden="true">'+p.icon+'</div><h3>'+p.name+'</h3><p>'+p.desc+'</p><div class="part-bottom"><div><span class="price-label">CURRENT LISTED PRICE</span><strong class="price-value">'+money(p.price)+'</strong><div class="price-source">Listed at <a href="'+p.priceUrl+'" target="_blank" rel="noopener noreferrer">'+p.priceSource+' ↗</a></div></div><span class="price-updated">Last manually checked Oct 24, 2026</span></div>'+'<div class="part-links gift-part-links"><a class="preview-product" href="'+p.url+'" target="_blank" rel="noopener noreferrer">Preview Product ↗</a><a class="gift-product" href="./gift.html?product='+encodeURIComponent(p.id)+'&v=20261025">Gift This Part →</a></div></article>').join('');updateTotals()}
+function render(){
+ const search=($('wishlistSearch')?.value||'').trim().toLowerCase();
+ const category=$('wishlistCategory')?.value||'all';
+ const sort=$('wishlistSort')?.value||'default';
+ let shown=parts.filter(p=>(category==='all'||p.category===category)&&(!search||[p.name,p.category,p.desc].join(' ').toLowerCase().includes(search)));
+ if(sort==='price-low')shown.sort((a,b)=>price(a)-price(b));
+ if(sort==='price-high')shown.sort((a,b)=>price(b)-price(a));
+ if(sort==='name')shown.sort((a,b)=>a.name.localeCompare(b.name));
+ if(sort==='purchased')shown.sort((a,b)=>Number(purchased(b))-Number(purchased(a)));
+ $('wishlistResult').textContent=shown.length+' of '+parts.length+' upgrades shown';
+ $('partsGrid').innerHTML=shown.length?shown.map(p=>'<article class="part '+(purchased(p)?'purchased':'')+'"><div class="part-top"><span class="tag">'+p.category+'</span><button class="purchase-toggle" type="button" data-purchase="'+p.id+'" aria-pressed="'+purchased(p)+'">'+(purchased(p)?'✓ Purchased':'＋ Mark purchased')+'</button></div><div class="part-icon" aria-hidden="true">'+p.icon+'</div><h3>'+p.name+'</h3><p>'+p.desc+'</p><div class="part-bottom"><div><span class="price-label">CURRENT LISTED PRICE</span><strong class="price-value">'+money(p.price)+'</strong><div class="price-source">Listed at <a href="'+p.priceUrl+'" target="_blank" rel="noopener noreferrer">'+p.priceSource+' ↗</a></div></div><span class="price-updated">Last manually checked Oct 24, 2026</span></div><div class="part-links gift-part-links"><a class="preview-product" href="'+p.url+'" target="_blank" rel="noopener noreferrer">Preview Product ↗</a><a class="gift-product" href="./gift.html?product='+encodeURIComponent(p.id)+'&v=20261025">Gift This Part →</a></div></article>').join(''):'<div class="empty">No upgrades match that search. Try another keyword or category.</div>';
+ updateTotals();
+}
 function updateTotals(){
  const total=parts.length,done=parts.filter(p=>purchased(p)).length,remaining=total-done,pct=total?Math.round(done/total*100):0;
  const sum=items=>items.reduce((acc,p)=>acc+price(p),0),all=sum(parts),spent=sum(parts.filter(p=>purchased(p))),left=sum(parts.filter(p=>!purchased(p)));
  $('dashPercent').textContent=pct+'%';$('dashProgressText').textContent=done+' of '+total+' upgrades purchased';$('dashProgressFill').style.width=pct+'%';$('dashProgressBar').setAttribute('aria-valuenow',String(pct));$('dashRemaining').textContent=remaining+' remaining';$('dashDone').textContent=done+' complete';$('dashPurchased').textContent=done+' / '+total;$('dashTotal').textContent=money(all);$('dashSpent').textContent=money(spent);$('dashLeft').textContent=money(left);
 }
 
+
+$('partsGrid').addEventListener('click',e=>{const button=e.target.closest('[data-purchase]');if(!button)return;const id=button.dataset.purchase;state[id]=state[id]||{};state[id].purchased=!state[id].purchased;if(!state[id].purchased&&!Object.keys(state[id]).length)delete state[id];save();render()});
+['wishlistSearch','wishlistCategory','wishlistSort'].forEach(id=>$(id)?.addEventListener(id==='wishlistSearch'?'input':'change',render));
 
 const resetButton=$('reset');if(resetButton)resetButton.addEventListener('click',()=>{if(confirm('Reset all purchase checkmarks?')){state={};save();render()}});
 render();
@@ -1588,3 +1604,18 @@ h2:after,.section-title:after{
 <script id="panda-settings-menu-script">
 (()=>{const $=id=>document.getElementById(id),overlay=$('siteSettings'),open=$('siteSettingsButton'),close=$('siteSettingsClose');if(!overlay||!open||overlay.dataset.ready)return;overlay.dataset.ready='1';const ids={particles:'settingParticles',glow:'settingGlow',motion:'settingMotion',compact:'settingCompact'},defaults={particles:true,glow:true,motion:true,compact:false};let prefs={...defaults};try{prefs={...defaults,...JSON.parse(localStorage.getItem('pandaSiteSettings')||'{}')}}catch(e){}function apply(){document.body.classList.toggle('settings-no-glow',!prefs.glow);document.body.classList.toggle('settings-no-motion',!prefs.motion);document.body.classList.toggle('settings-compact',prefs.compact);const canvas=$('panda-cosmic-fx');if(canvas)canvas.style.display=prefs.particles?'':'none';Object.entries(ids).forEach(([k,id])=>{if($(id))$(id).checked=!!prefs[k]})}function save(){try{localStorage.setItem('pandaSiteSettings',JSON.stringify(prefs));$('settingsSaved').textContent='Saved on this device.'}catch(e){$('settingsSaved').textContent='Browser storage is unavailable.'}apply()}function show(){overlay.classList.add('open');overlay.setAttribute('aria-hidden','false');document.body.style.overflow='hidden';close.focus()}function hide(){overlay.classList.remove('open');overlay.setAttribute('aria-hidden','true');document.body.style.overflow='';open.focus()}open.addEventListener('click',show);close.addEventListener('click',hide);overlay.addEventListener('click',e=>{if(e.target===overlay)hide()});document.addEventListener('keydown',e=>{if(e.key==='Escape'&&overlay.classList.contains('open'))hide()});Object.entries(ids).forEach(([k,id])=>$(id).addEventListener('change',e=>{prefs[k]=e.target.checked;save()}));$('settingsReset').addEventListener('click',()=>{prefs={...defaults};save()});apply()})();
 </script>
+
+<style id="panda-wishlist-upgrade">
+.sr-only{position:absolute!important;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+.wishlist-tools{display:grid;grid-template-columns:minmax(180px,1fr) minmax(145px,.45fr) minmax(160px,.5fr);gap:10px;align-items:center;margin:0 0 9px;padding:15px;border:1px solid rgba(139,105,255,.3);border-radius:16px;background:linear-gradient(120deg,rgba(15,17,53,.82),rgba(17,9,42,.8))}
+.wishlist-search-label{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0)}
+.wishlist-search,.wishlist-select{width:100%;min-width:0;min-height:43px;padding:9px 12px;border:1px solid rgba(151,125,255,.38);border-radius:10px;background:#090d29;color:#f5f3ff}
+.wishlist-search::placeholder{color:#8589aa}.wishlist-select{cursor:pointer}
+.wishlist-result{min-height:25px;margin:0 2px 12px;color:#aeb4d2;font-size:11px}
+.purchase-toggle{border:1px solid rgba(74,235,190,.42);border-radius:99px;padding:7px 11px;background:rgba(37,190,145,.09);color:#b9ffe4;font-size:11px;font-weight:800;cursor:pointer;white-space:nowrap}
+.part.purchased .purchase-toggle{background:rgba(37,190,145,.2);border-color:#58e8b2;color:#8fffd8}
+.part.purchased h3{text-decoration:line-through;text-decoration-color:#58e8b288}
+.part.purchased:after{content:"COMPLETED";position:absolute;right:15px;bottom:15px;color:#8fffd8;font-size:9px;font-weight:900;letter-spacing:.13em;pointer-events:none}
+@media(max-width:650px){.wishlist-tools{grid-template-columns:1fr 1fr;padding:11px}.wishlist-search{grid-column:1/-1}.purchase-toggle{font-size:10px;padding:7px 9px}}
+@media(max-width:380px){.wishlist-tools{grid-template-columns:1fr}.wishlist-search{grid-column:auto}.part.purchased:after{display:none}}
+</style>
